@@ -90,6 +90,10 @@ export type IpcGetPackageInfos = (
   deviceId: string,
   packageNames: string[]
 ) => Promise<IPackageInfo[]>
+export type IpcGetPackageDetail = (
+  deviceId: string,
+  packageName: string
+) => Promise<IPackageInfo>
 export type IpcGetAvds = (forceRefresh?: boolean) => Promise<IAvd[]>
 export type IpcStartAvd = (avdId: string) => Promise<void>
 export type IpcStopAvd = IpcStartAvd
@@ -118,6 +122,8 @@ export type IpcReverseTcp = (
   remote: string
 ) => Promise<number>
 export type IpcStartScrcpy = (deviceId: string, args: string[]) => Promise<void>
+export type IpcStartScrcpyV2 = (deviceId: string) => Promise<void>
+export type IpcSelectScrcpyPath = () => Promise<string | null>
 export type IpcConnectDevice = (host: string, port?: number) => Promise<void>
 export type IpcDisconnectDevice = IpcConnectDevice
 export type IpcMoveFile = (
@@ -172,3 +178,4 @@ export type IpcGetFileUrl = (
   path: string,
   port?: number
 ) => Promise<string>
+export type IpcGetDeviceCode = (deviceId: string) => Promise<string>
