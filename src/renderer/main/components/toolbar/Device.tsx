@@ -52,6 +52,34 @@ export default observer(function Device() {
           title={t('screencast')}
           onClick={() => main.showScreencast()}
         />
+        <ToolbarIcon
+          icon="external-link"
+          disabled={!store.device}
+          title="Screencast V2"
+          onClick={async () => {
+             if (store.device) {
+               console.log('Clicked Screencast V2', store.device.id)
+               
+               // 先尝试选择路径（如果没有保存的路径或路径无效）
+               if (main.selectScrcpyPath) {
+                 const path = await main.selectScrcpyPath()
+                 if (!path) {
+                   // 用户取消了选择
+                   return
+                 }
+               }
+               
+               if (main.startScrcpyV2) {
+                 main.startScrcpyV2(store.device.id).catch((e: any) => {
+                   console.error('Failed to start scrcpy v2', e)
+                   alert(`启动失败: ${e.message}`)
+                 })
+               } else {
+                 alert('Error: Function not found. Please restart the app completely.')
+               }
+             }
+           }}
+        />
       </LunaToolbar>
     </>
   )

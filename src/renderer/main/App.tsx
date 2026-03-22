@@ -9,6 +9,7 @@ import Webview from './components/webview/Webview'
 import Application from './components/application/Application'
 import File from './components/file/File'
 import Layout from './components/layout/Layout'
+import Remote from './components/remote/Remote'
 import Style from './App.module.scss'
 import Modal from 'luna-modal'
 import { t } from 'common/util'
@@ -75,6 +76,9 @@ export default observer(function App() {
             </Panel>
             <Panel panel="layout">
               <Layout />
+            </Panel>
+            <Panel panel="remote">
+              <Remote />
             </Panel>
           </div>
         </div>
