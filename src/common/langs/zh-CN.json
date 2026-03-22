@@ -95,6 +95,11 @@
   "size": "大小",
   "dateModified": "修改日期",
   "directory": "文件夹",
+  "bookmarks": "收藏夹",
+  "pinFolder": "收藏当前文件夹",
+  "unpinFolder": "取消收藏",
+  "noBookmarks": "无收藏",
+  "toggleSidebar": "切换侧边栏",
   "upload": "上传",
   "fileUploading": "正在上传文件 {{path}}",
   "uploadFileErr": "上传文件失败",
@@ -136,6 +141,9 @@
   "appSize": "应用大小",
   "videoBitRate": "视频比特率",
   "maxSize": "最大尺寸",
+  "maxFps": "最大帧率",
+  "videoCodec": "视频编码",
+  "unlimited": "不限制",
   "alwaysOnTop": "置顶",
   "documentation": "文档",
   "killAdbWhenExit": "退出时关闭 ADB",
@@ -179,5 +187,8 @@
   "source": "源",
   "destination": "目标",
   "duration": "时长",
-  "preview": "预览"
+  "preview": "预览",
+  "deviceCode": "设备码",
+  "copyDeviceCode": "复制设备码",
+  "copied": "已复制"
 }

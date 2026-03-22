@@ -95,6 +95,11 @@
   "size": "Size",
   "dateModified": "Date Modified",
   "directory": "Directory",
+  "bookmarks": "Bookmarks",
+  "pinFolder": "Pin Folder",
+  "unpinFolder": "Unpin Folder",
+  "noBookmarks": "No bookmarks",
+  "toggleSidebar": "Toggle Sidebar",
   "upload": "Upload",
   "fileUploading": "Uploading file {{path}}",
   "uploadFileErr": "Failed to upload file",
@@ -136,6 +141,9 @@
   "appSize": "App Size",
   "videoBitRate": "Video Bit Rate",
   "maxSize": "Max Size",
+  "maxFps": "Max FPS",
+  "videoCodec": "Video Codec",
+  "unlimited": "Unlimited",
   "alwaysOnTop": "Always on Top",
   "documentation": "Documentation",
   "killAdbWhenExit": "Kill ADB when exit",
@@ -179,5 +187,8 @@
   "source": "Source",
   "destination": "Destination",
   "duration": "Duration",
-  "preview": "Preview"
+  "preview": "Preview",
+  "deviceCode": "Device Code",
+  "copyDeviceCode": "Copy Device Code",
+  "copied": "Copied"
 }
