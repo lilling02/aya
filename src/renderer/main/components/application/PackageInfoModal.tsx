@@ -10,6 +10,8 @@ import dateFormat from 'licia/dateFormat'
 import { IModalProps } from 'share/common/types'
 import { Copyable } from '../common/Copyable'
 import { IPackageInfo } from 'common/types'
+import { useEffect, useState } from 'react'
+import store from '../../store'
 
 interface IProps extends IModalProps {
   packageInfo: IPackageInfo
@@ -17,6 +19,28 @@ interface IProps extends IModalProps {
 
 export default function PackageInfoModal(props: IProps) {
   const { packageInfo } = props
+  const [icon, setIcon] = useState(defaultIcon)
+  const [appSize, setAppSize] = useState(packageInfo.appSize)
+  const [dataSize, setDataSize] = useState(packageInfo.dataSize)
+  const [cacheSize, setCacheSize] = useState(packageInfo.cacheSize)
+  
+  useEffect(() => {
+    setIcon(defaultIcon)
+    setAppSize(packageInfo.appSize)
+    setDataSize(packageInfo.dataSize)
+    setCacheSize(packageInfo.cacheSize)
+    
+    if (props.visible) {
+      main.getPackageDetail(store.device!.id, packageInfo.packageName).then((info: IPackageInfo) => {
+        if (info.icon) {
+          setIcon(info.icon)
+        }
+        setAppSize(info.appSize)
+        setDataSize(info.dataSize)
+        setCacheSize(info.cacheSize)
+      })
+    }
+  }, [props.visible, packageInfo])
 
   const signature = packageInfo.signatures[0]
 
@@ -29,7 +53,7 @@ export default function PackageInfoModal(props: IProps) {
     >
       <div className={Style.header}>
         <div className={Style.icon}>
-          <img src={packageInfo.icon || defaultIcon} />
+          <img src={icon} />
         </div>
         <div className={Style.basic}>
           <div className={Style.label}>{packageInfo.label}</div>
@@ -58,9 +82,9 @@ export default function PackageInfoModal(props: IProps) {
         dateFormat(new Date(packageInfo.lastUpdateTime), 'yyyy-mm-dd HH:MM:ss')
       )}
       {item(t('apkSize'), fileSize(packageInfo.apkSize))}
-      {item(t('appSize'), fileSize(packageInfo.appSize))}
-      {item(t('dataSize'), fileSize(packageInfo.dataSize))}
-      {item(t('cacheSize'), fileSize(packageInfo.cacheSize))}
+      {item(t('appSize'), fileSize(appSize))}
+      {item(t('dataSize'), fileSize(dataSize))}
+      {item(t('cacheSize'), fileSize(cacheSize))}
       {signature &&
         item(t('signature') + ' MD5', md5(convertBin(signature, 'Unit8Array')))}
     </LunaModal>,
