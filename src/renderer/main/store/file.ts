@@ -12,6 +12,7 @@ export class File {
   weights = [70, 30]
   transferWeight = 30
   transfers: Transfer[] = []
+  bookmarks: string[] = []
   constructor() {
     makeObservable(this, {
       listView: observable,
@@ -20,6 +21,7 @@ export class File {
       transferWeight: observable,
       transfers: observable,
       weights: observable,
+      bookmarks: observable,
     })
 
     this.init()
@@ -41,6 +43,7 @@ export class File {
       transferWeight: this.transferWeight,
       showPreview: this.showPreview,
       weights: toJS(this.weights),
+      bookmarks: toJS(this.bookmarks),
     })
   }
   private bindEvent() {

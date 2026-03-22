@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { toJS } from 'mobx'
 import LunaToolbar, {
   LunaToolbarHtml,
   LunaToolbarInput,
@@ -341,6 +342,48 @@ export default observer(function File() {
             onChange={(path) => goCustomPath('/' + path)}
           />
         </LunaToolbarHtml>
+        <ToolbarIcon
+          icon="pin"
+          title={
+            file.bookmarks.includes(path) ? t('unpinFolder') : t('pinFolder')
+          }
+          state={file.bookmarks.includes(path) ? 'active' : ''}
+          onClick={() => {
+            const bookmarks = toJS(file.bookmarks)
+            if (bookmarks.includes(path)) {
+              const idx = bookmarks.indexOf(path)
+              if (idx > -1) {
+                bookmarks.splice(idx, 1)
+                notify(t('unpinFolder'))
+              }
+            } else {
+              bookmarks.push(path)
+              notify(t('pinFolder'))
+            }
+            file.set('bookmarks', bookmarks)
+          }}
+          disabled={!device}
+        />
+        <ToolbarIcon
+          icon="manage"
+          title={t('bookmarks')}
+          
+          onClick={(e) => {
+            const template: any[] = []
+            if (isEmpty(file.bookmarks)) {
+              template.push({ label: t('noBookmarks'), enabled: false })
+            } else {
+              file.bookmarks.forEach((b) => {
+                template.push({
+                  label: b,
+                  click: () => go(b),
+                })
+              })
+            }
+            contextMenu(e, template)
+          }}
+          disabled={!device}
+        />
         <LunaToolbarInput
           keyName="filter"
           value={filter}
