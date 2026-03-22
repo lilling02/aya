@@ -8,9 +8,8 @@ import waitUntil from 'licia/waitUntil'
 import { forwardTcp, getDeviceStore, setDeviceStore, shell } from './base'
 import contain from 'licia/contain'
 import log from 'share/common/log'
-import { IPackageInfo, IpcGetFileUrl, IpcGetPackageInfos } from 'common/types'
+import { IPackageInfo, IpcGetFileUrl, IpcGetPackageInfos, IpcGetPackageDetail } from 'common/types'
 import isEmpty from 'licia/isEmpty'
-import isUndef from 'licia/isUndef'
 import each from 'licia/each'
 import startWith from 'licia/startWith'
 import extend from 'licia/extend'
@@ -118,34 +117,104 @@ const getPackageInfos: IpcGetPackageInfos = singleton(async function (
   deviceId,
   packageNames
 ) {
-  const client = await getAyaClient(deviceId)
-  const result = await client.sendMessage('getPackageInfos', {
-    packageNames,
-  })
-  const { packageInfos } = result
-  const serverPort = await getFileServerPort(deviceId)
-  if (!isEmpty(packageInfos)) {
-    for (let i = 0, len = packageInfos.length; i < len; i++) {
-      const info: IPackageInfo = packageInfos[i]
-      if (info.icon) {
-        info.icon = await getFileUrl(deviceId, info.icon, serverPort)
-      }
+  const output = await shell(deviceId, 'pm list packages -f')
+  const lines = output.split('\n')
+  const infos: IPackageInfo[] = []
+  
+  for (let line of lines) {
+    line = line.trim()
+    if (!startWith(line, 'package:')) continue
+    
+    // package:/path/to.apk=com.example
+    const content = line.slice(8)
+    const equalIndex = content.lastIndexOf('=')
+    if (equalIndex === -1) continue
+    
+    const apkPath = content.slice(0, equalIndex)
+    const packageName = content.slice(equalIndex + 1)
+    
+    if (!isEmpty(packageNames) && !contain(packageNames, packageName)) {
+      continue
     }
-    if (isUndef(packageInfos[0].appSize)) {
-      const packageDiskStats = await getPackageDiskStats(deviceId)
-      for (let i = 0, len = packageInfos.length; i < len; i++) {
-        const info: IPackageInfo = packageInfos[i]
-        if (info.packageName && packageDiskStats[info.packageName]) {
-          extend(info, packageDiskStats[info.packageName])
-        } else {
-          info.appSize = 0
-          info.dataSize = 0
-          info.cacheSize = 0
-        }
-      }
-    }
+    
+    const isSystem = startWith(apkPath, '/system') || startWith(apkPath, '/vendor') || startWith(apkPath, '/product')
+    
+    infos.push({
+      icon: '',
+      label: packageName,
+      enabled: true,
+      packageName,
+      versionName: '',
+      apkPath,
+      apkSize: 0,
+      system: isSystem,
+      firstInstallTime: 0,
+      lastUpdateTime: 0,
+      dataSize: 0,
+      cacheSize: 0,
+      appSize: 0,
+      signatures: []
+    })
   }
-  return packageInfos
+  
+  return infos
+})
+
+const getPackageDetail: IpcGetPackageDetail = singleton(async function (
+  deviceId,
+  packageName
+) {
+  const info: IPackageInfo = {
+    icon: '',
+    label: packageName,
+    enabled: true,
+    packageName,
+    versionName: '',
+    apkPath: '',
+    apkSize: 0,
+    system: false,
+    firstInstallTime: 0,
+    lastUpdateTime: 0,
+    dataSize: 0,
+    cacheSize: 0,
+    appSize: 0,
+    signatures: []
+  }
+
+  try {
+    const pathOutput = await shell(deviceId, `pm path ${packageName}`)
+    if (pathOutput && typeof pathOutput === 'string' && startWith(pathOutput.trim(), 'package:')) {
+      info.apkPath = pathOutput.trim().slice(8)
+      if (startWith(info.apkPath, '/system') || startWith(info.apkPath, '/vendor') || startWith(info.apkPath, '/product')) {
+        info.system = true
+      }
+    }
+
+    const dumpsys = await shell(deviceId, `dumpsys package ${packageName}`)
+    if (typeof dumpsys === 'string') {
+      const versionMatch = dumpsys.match(/versionName=([^\s]+)/)
+      if (versionMatch) {
+        info.versionName = versionMatch[1]
+      }
+      const firstInstallMatch = dumpsys.match(/firstInstallTime=([^\n]+)/)
+      if (firstInstallMatch) {
+         info.firstInstallTime = new Date(firstInstallMatch[1].trim()).getTime()
+      }
+      const lastUpdateMatch = dumpsys.match(/lastUpdateTime=([^\n]+)/)
+      if (lastUpdateMatch) {
+         info.lastUpdateTime = new Date(lastUpdateMatch[1].trim()).getTime()
+      }
+    }
+
+    const packageDiskStats = await getPackageDiskStats(deviceId)
+    if (packageDiskStats[packageName]) {
+      extend(info, packageDiskStats[packageName])
+    }
+  } catch (e) {
+    logger.error(e)
+  }
+  
+  return info
 })
 
 const getPackageDiskStats = async function (deviceId: string) {
@@ -213,5 +282,6 @@ export async function init(c: Client) {
   client = c
 
   handleEvent('getPackageInfos', getPackageInfos)
+  handleEvent('getPackageDetail', getPackageDetail)
   handleEvent('getFileUrl', getFileUrl)
 }

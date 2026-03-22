@@ -25,6 +25,7 @@ import * as logcat from './adb/logcat'
 import * as shellAdb from './adb/shell'
 import * as server from './adb/server'
 import * as scrcpy from './adb/scrcpy'
+import * as scrcpy_v2 from './adb/scrcpy_v2'
 import * as packageAdb from './adb/package'
 import * as file from './adb/file'
 import * as fps from './adb/fps'
@@ -40,6 +41,7 @@ import {
   IpcInputKey,
   IpcPairDevice,
   IpcScreencap,
+  IpcGetDeviceCode,
 } from 'common/types'
 import path from 'node:path'
 import childProcess from 'node:child_process'
@@ -112,6 +114,16 @@ async function getOverview(deviceId: string) {
     ...(await getStorage(deviceId)),
     ...(await getMemory(deviceId)),
     ...(await getScreen(deviceId)),
+  }
+}
+
+const getDeviceCode: IpcGetDeviceCode = async function (deviceId) {
+  try {
+    const result = await shell(deviceId, 'cat /sdcard/ast-shard/uncode')
+    return result as string
+  } catch (e) {
+    logger.error('getDeviceCode error', e)
+    return ''
   }
 }
 
@@ -411,6 +423,7 @@ export async function init() {
   shellAdb.init(client)
   server.init(client)
   scrcpy.init(client)
+  scrcpy_v2.init()
   packageAdb.init(client)
   file.init(client)
   fps.init()
@@ -433,4 +446,5 @@ export async function init() {
   handleEvent('startWireless', startWireless)
   handleEvent('restartAdbServer', restartAdbServer)
   handleEvent('pairDevice', pairDevice)
+  handleEvent('getDeviceCode', getDeviceCode)
 }
