@@ -48,6 +48,9 @@ import {
   IpcUninstallPackage,
   IpcWipeAvdData,
   IpcWriteShell,
+  IpcGetDeviceCode,
+  IpcStartScrcpyV2,
+  IpcSelectScrcpyPath,
 } from 'common/types'
 import { IpcGetStore, IpcSetStore } from 'share/common/types'
 import mainObj from 'share/preload/main'
@@ -94,6 +97,7 @@ export default Object.assign(mainObj, {
   uninstallPackage: invoke<IpcUninstallPackage>('uninstallPackage'),
   getPackages: invoke<IpcGetPackages>('getPackages'),
   getPackageInfos: invoke<IpcGetPackageInfos>('getPackageInfos'),
+  getPackageDetail: invoke<IpcGetPackageInfos>('getPackageDetail'),
   disablePackage: invoke<IpcDisablePackage>('disablePackage'),
   enablePackage: invoke<IpcEnablePackage>('enablePackage'),
   pullFile: invoke<IpcPullFile>('pullFile'),
@@ -108,6 +112,8 @@ export default Object.assign(mainObj, {
   connectDevice: invoke<IpcConnectDevice>('connectDevice'),
   disconnectDevice: invoke<IpcDisconnectDevice>('disconnectDevice'),
   startScrcpy: invoke<IpcStartScrcpy>('startScrcpy'),
+  startScrcpyV2: invoke<IpcStartScrcpyV2>('startScrcpyV2'),
+  selectScrcpyPath: invoke<IpcSelectScrcpyPath>('selectScrcpyPath'),
   reverseTcp: invoke<IpcReverseTcp>('reverseTcp'),
   inputKey: invoke<IpcInputKey>('inputKey'),
   listForwards: invoke<IpcListForwards>('listForwards'),
@@ -125,4 +131,5 @@ export default Object.assign(mainObj, {
   restartAdbServer: invoke('restartAdbServer'),
   pairDevice: invoke<IpcPairDevice>('pairDevice'),
   getFileUrl: invoke<IpcGetFileUrl>('getFileUrl'),
+  getDeviceCode: invoke<IpcGetDeviceCode>('getDeviceCode'),
 })
