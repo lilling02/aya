@@ -1,4 +1,4 @@
-.mini-panel {
+.miniPanel {
   height: 120px;
   background-color: #1e1e1e;
   border: 1px solid #3a3a3a;
@@ -14,7 +14,7 @@
   }
 }
 
-.mini-header {
+.miniHeader {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -23,7 +23,7 @@
   border-bottom: 1px solid #3a3a3a;
 }
 
-.status-dot {
+.statusDot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -38,7 +38,7 @@
   }
 }
 
-.device-name {
+.deviceName {
   font-size: 13px;
   font-weight: 500;
   color: #cccccc;
@@ -47,7 +47,7 @@
   text-overflow: ellipsis;
 }
 
-.mini-output {
+.miniOutput {
   flex: 1;
   overflow-y: auto;
   padding: 8px;
@@ -56,7 +56,7 @@
   line-height: 1.4;
 }
 
-.output-line {
+.outputLine {
   color: #d4d4d4;
   white-space: pre-wrap;
   word-break: break-all;

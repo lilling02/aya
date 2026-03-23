@@ -1,4 +1,4 @@
-.screenshot-overview {
+.container {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -16,12 +16,12 @@
   border: 1px solid var(--border-color);
 }
 
-.device-count {
+.deviceCount {
   font-size: 14px;
   color: var(--text-color);
 }
 
-.refresh-selector {
+.refreshSelector {
   select {
     padding: 6px 12px;
     border: 1px solid var(--border-color);
@@ -43,12 +43,12 @@
   }
 }
 
-.grid-container {
+.gridContainer {
   flex: 1;
   overflow-y: auto;
 }
 
-.device-grid {
+.deviceGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
@@ -62,7 +62,7 @@
   }
 }
 
-.empty-state {
+.emptyState {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,7 +71,7 @@
   font-size: 14px;
 }
 
-.context-menu {
+.contextMenu {
   position: fixed;
   background: var(--panel-bg);
   border: 1px solid var(--border-color);
@@ -82,7 +82,7 @@
   min-width: 140px;
 }
 
-.menu-item {
+.menuItem {
   padding: 8px 12px;
   font-size: 13px;
   cursor: pointer;

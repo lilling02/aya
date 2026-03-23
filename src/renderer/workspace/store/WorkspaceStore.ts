@@ -1,6 +1,5 @@
 import { makeAutoObservable, runInAction, toJS } from 'mobx'
 import { dataUrl } from 'licia/dataUrl'
-import { invoke } from '../../preload/main'
 
 interface IpcGetDevices {
   id: string
@@ -43,11 +42,13 @@ export default class WorkspaceStore {
   constructor() {
     makeAutoObservable(this)
     this.loadHistory()
+    this.syncDevices()
+    this.registerDeviceChangeListener()
   }
 
   async loadHistory() {
     try {
-      const history = await invoke<string>('getMainStore', 'commandHistory')
+      const history = await main.getMainStore('commandHistory')
       if (history) {
         runInAction(() => {
           this.commandHistory = JSON.parse(history)
@@ -59,12 +60,12 @@ export default class WorkspaceStore {
   }
 
   async saveHistory() {
-    await invoke('setMainStore', 'commandHistory', JSON.stringify(this.commandHistory))
+    await main.setMainStore('commandHistory', JSON.stringify(this.commandHistory))
   }
 
   async syncDevices() {
     try {
-      const devices = await invoke<IpcGetDevices[]>('getDevices')
+      const devices = await main.getDevices()
       runInAction(() => {
         devices.forEach(device => {
           const existing = this.devices.get(device.id)
@@ -83,7 +84,7 @@ export default class WorkspaceStore {
 
   async captureScreenshot(deviceId: string) {
     try {
-      const data = await invoke<Uint8Array>('screencap', deviceId)
+      const data = await main.screencap(deviceId)
       const url = dataUrl.stringify(data, 'image/png')
       const device = this.devices.get(deviceId)
       if (device) {
@@ -99,7 +100,7 @@ export default class WorkspaceStore {
   }
 
   registerDeviceChangeListener() {
-    invoke('on', 'changeMemStore', (key: string, value: any) => {
+    main.on('changeMemStore', (key: string, value: any) => {
       if (key === 'devices') {
         runInAction(() => {
           const devices = JSON.parse(value)

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { workspaceStore, ICommandHistory } from '../../store'
-import './CommandHistoryModal.module.scss'
+import Style from './CommandHistoryModal.module.scss'
+import className from 'licia/className'
 
 interface Props {
   onClose: () => void
@@ -76,43 +77,43 @@ export default observer(function CommandHistoryModal({ onClose, onSelect }: Prop
     : workspaceStore.commandHistory.filter(item => item.isFavorite)
 
   return (
-    <div className="overlay" onClick={handleOverlayClick}>
-      <div className="content">
-        <div className="header">
-          <div className="tabs">
+    <div className={Style.overlay} onClick={handleOverlayClick}>
+      <div className={Style.content}>
+        <div className={Style.header}>
+          <div className={Style.tabs}>
             <button
-              className={`tab ${activeTab === 'history' ? 'active' : ''}`}
+              className={className(Style.tab, activeTab === 'history' ? Style.active : '')}
               onClick={() => setActiveTab('history')}
             >
               历史
             </button>
             <button
-              className={`tab ${activeTab === 'favorites' ? 'active' : ''}`}
+              className={className(Style.tab, activeTab === 'favorites' ? Style.active : '')}
               onClick={() => setActiveTab('favorites')}
             >
               收藏
             </button>
           </div>
-          <button className="close-btn" onClick={onClose}>X</button>
+          <button className={Style.closeBtn} onClick={onClose}>X</button>
         </div>
-        <div className="body">
+        <div className={Style.body}>
           {displayedHistory.length === 0 ? (
-            <div className="empty-state">
+            <div className={Style.emptyState}>
               {activeTab === 'history' ? '暂无历史命令' : '暂无收藏命令'}
             </div>
           ) : (
-            <div className="list">
+            <div className={Style.list}>
               {displayedHistory.map(item => (
                 <div
                   key={item.id}
-                  className="item"
+                  className={Style.item}
                   onClick={() => handleItemClick(item)}
                 >
-                  <div className="item-main">
+                  <div className={Style.itemMain}>
                     {editingId === item.id ? (
                       <input
                         type="text"
-                        className="alias-input"
+                        className={Style.aliasInput}
                         value={editingAlias}
                         onChange={e => setEditingAlias(e.target.value)}
                         onBlur={() => handleAliasSave(item.id)}
@@ -121,24 +122,24 @@ export default observer(function CommandHistoryModal({ onClose, onSelect }: Prop
                         autoFocus
                       />
                     ) : (
-                      <span className="command-text">
+                      <span className={Style.commandText}>
                         {item.alias || item.command}
                       </span>
                     )}
-                    <span className="timestamp">
+                    <span className={Style.timestamp}>
                       {formatTimestamp(item.timestamp)}
                     </span>
                   </div>
-                  <div className="item-actions">
+                  <div className={Style.itemActions}>
                     <button
-                      className={`action-btn favorite-btn ${item.isFavorite ? 'favorited' : ''}`}
+                      className={className(Style.actionBtn, Style.favoriteBtn, item.isFavorite ? Style.favorited : '')}
                       onClick={e => handleFavoriteClick(e, item.id)}
                       title={item.isFavorite ? '取消收藏' : '收藏'}
                     >
                       {item.isFavorite ? '★' : '☆'}
                     </button>
                     <button
-                      className="action-btn edit-btn"
+                      className={className(Style.actionBtn, Style.editBtn)}
                       onClick={e => handleEditClick(e, item)}
                       title="设置别名"
                     >

@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite'
 import { IWorkspaceDevice } from '../../store'
-import './MiniPanel.module.scss'
+import Style from './MiniPanel.module.scss'
+import className from 'licia/className'
 
 interface Props {
   device: IWorkspaceDevice
@@ -16,14 +17,14 @@ export default observer(function MiniPanel({ device, output, onClick }: Props) {
   const last50Lines = output.slice(-50)
 
   return (
-    <div className="mini-panel" onClick={handleClick}>
-      <div className="mini-header">
-        <span className={`status-dot ${device.online ? 'online' : 'offline'}`} />
-        <span className="device-name">{device.name}</span>
+    <div className={Style.miniPanel} onClick={handleClick}>
+      <div className={Style.miniHeader}>
+        <span className={className(Style.statusDot, device.online ? Style.online : Style.offline)} />
+        <span className={Style.deviceName}>{device.name}</span>
       </div>
-      <div className="mini-output">
+      <div className={Style.miniOutput}>
         {last50Lines.map((line, index) => (
-          <div key={index} className="output-line">{line}</div>
+          <div key={index} className={Style.outputLine}>{line}</div>
         ))}
       </div>
     </div>

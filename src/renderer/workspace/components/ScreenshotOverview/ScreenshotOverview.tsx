@@ -2,7 +2,8 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { workspaceStore } from '../../store'
 import ScreenshotCard from '../ScreenshotCard/ScreenshotCard'
-import './ScreenshotOverview.module.scss'
+import Style from './ScreenshotOverview.module.scss'
+import className from 'licia/className'
 
 interface Props {
   onOpenPreview: (deviceId: string) => void
@@ -72,8 +73,8 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
 
   if (totalCount === 0) {
     return (
-      <div className="screenshot-overview">
-        <div className="empty-state">
+      <div className={Style.container}>
+        <div className={Style.emptyState}>
           未发现设备，请确保 ADB 已连接
         </div>
       </div>
@@ -81,12 +82,12 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
   }
 
   return (
-    <div className="screenshot-overview">
-      <div className="toolbar">
-        <div className="device-count">
+    <div className={Style.container}>
+      <div className={Style.toolbar}>
+        <div className={Style.deviceCount}>
           {onlineCount} / {totalCount} 在线
         </div>
-        <div className="refresh-selector">
+        <div className={Style.refreshSelector}>
           <select
             value={workspaceStore.refreshInterval}
             onChange={handleIntervalChange}
@@ -100,8 +101,8 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
         </div>
       </div>
 
-      <div className="grid-container">
-        <div className="device-grid">
+      <div className={Style.gridContainer}>
+        <div className={Style.deviceGrid}>
           {devices.map(device => (
             <ScreenshotCard
               key={device.id}
@@ -115,11 +116,11 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
 
       {contextMenu && (
         <div
-          className="context-menu"
+          className={Style.contextMenu}
           style={menuStyle}
           onClick={e => e.stopPropagation()}
         >
-          <div className="menu-item" onClick={() => {
+          <div className={Style.menuItem} onClick={() => {
   onOpenPreview(contextMenu.deviceId)
   setContextMenu(null)
 }}>

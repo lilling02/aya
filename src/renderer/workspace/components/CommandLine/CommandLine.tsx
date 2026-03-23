@@ -1,63 +1,89 @@
 import { useState, useRef, useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { workspaceStore } from '../../store'
-import { invoke } from '../../../preload/main'
+import mainStore from '../../../main/store'
 import MiniPanel from '../MiniPanel/MiniPanel'
 import CommandHistoryModal from '../CommandHistoryModal/CommandHistoryModal'
-import './CommandLine.module.scss'
+import Style from './CommandLine.module.scss'
+import className from 'licia/className'
+import {
+  colorBgContainerDark,
+  colorTextDark,
+  colorBgContainer,
+  colorText,
+} from 'common/theme'
 
 interface DeviceShell {
   sessionId: string
-  output: string[]
 }
 
 export default observer(function CommandLine() {
   const [activeDeviceId, setActiveDeviceId] = useState<string | null>(null)
   const [command, setCommand] = useState('')
   const [showHistory, setShowHistory] = useState(false)
-  const [deviceOutputs, setDeviceOutputs] = useState<Map<string, string[]>>(new Map())
+  const [deviceOutputs, setDeviceOutputs] = useState<Map<string, string>>(new Map())
   const [deviceShells, setDeviceShells] = useState<Map<string, DeviceShell>>(new Map())
   const activeSessions = useRef<Set<string>>(new Set())
   const outputRef = useRef<HTMLDivElement>(null)
+  const deviceShellsRef = useRef(deviceShells)
 
   const devices = Array.from(workspaceStore.devices.values())
   const selectedCount = workspaceStore.selectedDeviceIds.size
 
   const activeDevice = activeDeviceId ? workspaceStore.devices.get(activeDeviceId) : null
-  const activeOutput = activeDeviceId ? deviceOutputs.get(activeDeviceId) || [] : []
+  const activeOutput = activeDeviceId ? deviceOutputs.get(activeDeviceId) || '' : ''
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    deviceShellsRef.current = deviceShells
+  }, [deviceShells])
+
+  // Listen for shell data pushed from main process
+  useEffect(() => {
+    function onShellData(sessionId: string, data: string) {
+      // Find which device this session belongs to using ref
+      for (const [deviceId, shell] of deviceShellsRef.current) {
+        if (shell.sessionId === sessionId) {
+          setDeviceOutputs(prev => {
+            const newMap = new Map(prev)
+            const existing = newMap.get(deviceId) || ''
+            newMap.set(deviceId, existing + data)
+            return newMap
+          })
+          break
+        }
+      }
+    }
+    const offShellData = main.on('shellData', onShellData)
+    return offShellData
+  }, [])
 
   useEffect(() => {
     outputRef.current?.scrollTo(0, outputRef.current.scrollHeight)
   }, [activeOutput])
 
-  // Poll for shell output
-  useEffect(() => {
-    const pollInterval = setInterval(async () => {
-      for (const [deviceId, shell] of deviceShells) {
-        try {
-          const output = await invoke<string>('readShell', shell.sessionId)
-          if (output) {
-            setDeviceOutputs(prev => {
-              const newMap = new Map(prev)
-              const existing = newMap.get(deviceId) || []
-              newMap.set(deviceId, [...existing, output])
-              return newMap
-            })
-          }
-        } catch (err) {
-          // Shell may have been destroyed or not ready
-        }
-      }
-    }, 500)
+  // Create shell for a device when needed
+  const ensureShell = async (deviceId: string) => {
+    if (deviceShells.has(deviceId)) {
+      return deviceShells.get(deviceId)!.sessionId
+    }
 
-    return () => clearInterval(pollInterval)
-  }, [deviceShells])
+    try {
+      const sessionId = await main.createShell(deviceId)
+      activeSessions.current.add(sessionId)
+      setDeviceShells(prev => new Map(prev).set(deviceId, { sessionId }))
+      return sessionId
+    } catch (err) {
+      console.error(`Failed to create shell for device ${deviceId}:`, err)
+      return null
+    }
+  }
 
   // Cleanup shells on unmount
   useEffect(() => {
     return () => {
       for (const sessionId of activeSessions.current) {
-        invoke('destroyShell', sessionId).catch(() => {
+        main.killShell(sessionId).catch(() => {
           // Ignore errors during cleanup
         })
       }
@@ -92,25 +118,13 @@ export default observer(function CommandLine() {
 
     const selectedIds = Array.from(workspaceStore.selectedDeviceIds)
     for (const deviceId of selectedIds) {
-      let shell = deviceShells.get(deviceId)
-      if (!shell) {
-        try {
-          const sessionId = await invoke<string>('createShell', deviceId)
-          shell = { sessionId, output: [] }
-          activeSessions.current.add(sessionId)
-          setDeviceShells(prev => new Map(prev).set(deviceId, shell!))
-        } catch (err) {
-          console.error(`Failed to create shell for device ${deviceId}:`, err)
-          continue
-        }
-      }
+      const sessionId = await ensureShell(deviceId)
+      if (!sessionId) continue
 
       try {
-        await invoke('writeShell', shell.sessionId, command + '\n')
-        const newOutput = [...shell.output, `$ ${command}`]
-        setDeviceOutputs(prev => new Map(prev).set(deviceId, newOutput))
+        await main.writeShell(sessionId, command + '\n')
       } catch (err) {
-        console.error(`Failed to write to shell ${shell.sessionId}:`, err)
+        console.error(`Failed to write to shell for device ${deviceId}:`, err)
       }
     }
 
@@ -122,57 +136,63 @@ export default observer(function CommandLine() {
     setShowHistory(false)
   }
 
+  const isDark = mainStore.settings.theme === 'dark'
+  const terminalBg = isDark ? colorBgContainerDark : colorBgContainer
+  const terminalFg = isDark ? colorTextDark : colorText
+
   return (
-    <div className="command-line">
-      <div className="content-area">
-        <div className="main-panel">
-          <div className="main-header">
+    <div className={Style.commandLine}>
+      <div className={Style.contentArea}>
+        <div className={Style.mainPanel}>
+          <div className={Style.mainHeader}>
             {activeDevice ? (
               <>
-                <span className={`status-dot ${activeDevice.online ? 'online' : 'offline'}`} />
-                <span className="device-name">{activeDevice.name}</span>
+                <span className={className(Style.statusDot, activeDevice.online ? Style.online : Style.offline)} />
+                <span className={Style.deviceName}>{activeDevice.name}</span>
               </>
             ) : (
-              <span className="no-device">未选择设备</span>
+              <span className={Style.noDevice}>未选择设备</span>
             )}
           </div>
-          <div className="terminal-output" ref={outputRef}>
+          <div
+            className={Style.terminalOutput}
+            ref={outputRef}
+            style={{ backgroundColor: terminalBg, color: terminalFg }}
+          >
             {activeDevice ? (
-              activeOutput.length > 0 ? (
-                activeOutput.map((line, index) => (
-                  <div key={index} className="output-line">{line}</div>
-                ))
+              activeOutput ? (
+                <pre className={Style.outputLine} style={{ color: terminalFg }}>{activeOutput}</pre>
               ) : (
-                <div className="empty-terminal">
+                <div className={Style.emptyTerminal}>
                   终端输出将显示在这里
                 </div>
               )
             ) : (
-              <div className="empty-state">
-                <div className="empty-icon">+</div>
-                <div className="empty-text">从右侧列表选择一个设备</div>
+              <div className={Style.emptyState}>
+                <div className={Style.emptyIcon}>+</div>
+                <div className={Style.emptyText}>从右侧列表选择一个设备</div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="sidebar">
-          <div className="sidebar-header">
+        <div className={Style.sidebar}>
+          <div className={Style.sidebarHeader}>
             <span>设备列表</span>
-            <span className="device-count">{devices.length}</span>
+            <span className={Style.deviceCount}>{devices.length}</span>
           </div>
-          <div className="device-list">
+          <div className={Style.deviceList}>
             {devices.length > 0 ? (
               devices.map(device => (
                 <MiniPanel
                   key={device.id}
                   device={device}
-                  output={deviceOutputs.get(device.id) || []}
+                  output={(deviceOutputs.get(device.id) || '').split('\n')}
                   onClick={handleMiniPanelClick}
                 />
               ))
             ) : (
-              <div className="empty-device-list">
+              <div className={Style.emptyDeviceList}>
                 暂无设备
               </div>
             )}
@@ -180,9 +200,9 @@ export default observer(function CommandLine() {
         </div>
       </div>
 
-      <div className="broadcast-bar">
-        <div className="device-selector">
-          <label className="selector-item">
+      <div className={Style.broadcastBar}>
+        <div className={Style.deviceSelector}>
+          <label className={Style.selectorItem}>
             <input
               type="checkbox"
               checked={selectedCount === devices.length && devices.length > 0}
@@ -190,7 +210,7 @@ export default observer(function CommandLine() {
             />
             <span>全选</span>
           </label>
-          <label className="selector-item">
+          <label className={Style.selectorItem}>
             <input
               type="checkbox"
               checked={selectedCount === 0}
@@ -198,34 +218,34 @@ export default observer(function CommandLine() {
             />
             <span>全不选</span>
           </label>
-          <div className="selector-divider" />
+          <div className={Style.selectorDivider} />
           {devices.slice(0, 3).map(device => (
-            <label key={device.id} className="selector-item device-checkbox">
+            <label key={device.id} className={Style.deviceCheckbox}>
               <input
                 type="checkbox"
                 checked={workspaceStore.selectedDeviceIds.has(device.id)}
                 onChange={() => handleToggleDevice(device.id)}
               />
-              <span className={`status-dot ${device.online ? 'online' : 'offline'}`} />
-              <span className="device-name">{device.name}</span>
+              <span className={className(Style.statusDot, device.online ? Style.online : Style.offline)} />
+              <span className={Style.deviceName}>{device.name}</span>
             </label>
           ))}
           {devices.length > 3 && (
-            <span className="more-devices">+{devices.length - 3}</span>
+            <span className={Style.moreDevices}>+{devices.length - 3}</span>
           )}
         </div>
 
-        <form className="command-form" onSubmit={handleCommandSubmit}>
+        <form className={Style.commandForm} onSubmit={handleCommandSubmit}>
           <input
             type="text"
-            className="command-input"
+            className={Style.commandInput}
             value={command}
             onChange={e => setCommand(e.target.value)}
             placeholder="输入命令..."
           />
           <button
             type="button"
-            className="history-btn"
+            className={Style.historyBtn}
             onClick={() => setShowHistory(true)}
             title="历史命令"
           >
@@ -233,7 +253,7 @@ export default observer(function CommandLine() {
           </button>
           <button
             type="submit"
-            className="broadcast-btn"
+            className={Style.broadcastBtn}
             disabled={selectedCount === 0 || !command.trim()}
           >
             广播 ({selectedCount})
