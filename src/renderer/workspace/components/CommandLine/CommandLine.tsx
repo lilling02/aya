@@ -29,6 +29,40 @@ export default observer(function CommandLine() {
     outputRef.current?.scrollTo(0, outputRef.current.scrollHeight)
   }, [activeOutput])
 
+  // Poll for shell output
+  useEffect(() => {
+    const pollInterval = setInterval(async () => {
+      for (const [deviceId, shell] of deviceShells) {
+        try {
+          const output = await invoke<string>('readShell', shell.sessionId)
+          if (output) {
+            setDeviceOutputs(prev => {
+              const newMap = new Map(prev)
+              const existing = newMap.get(deviceId) || []
+              newMap.set(deviceId, [...existing, output])
+              return newMap
+            })
+          }
+        } catch (err) {
+          // Shell may have been destroyed or not ready
+        }
+      }
+    }, 500)
+
+    return () => clearInterval(pollInterval)
+  }, [deviceShells])
+
+  // Cleanup shells on unmount
+  useEffect(() => {
+    return () => {
+      for (const shell of deviceShells.values()) {
+        invoke('destroyShell', shell.sessionId).catch(() => {
+          // Ignore errors during cleanup
+        })
+      }
+    }
+  }, [])
+
   const handleMiniPanelClick = (deviceId: string) => {
     setActiveDeviceId(deviceId)
   }
@@ -83,6 +117,7 @@ export default observer(function CommandLine() {
 
   const handleHistorySelect = (selectedCommand: string) => {
     setCommand(selectedCommand)
+    setShowHistory(false)
   }
 
   return (
@@ -149,7 +184,7 @@ export default observer(function CommandLine() {
             <input
               type="checkbox"
               checked={selectedCount === devices.length && devices.length > 0}
-              onChange={selectedCount === devices.length ? handleDeselectAll : handleSelectAll}
+              onChange={e => e.target.checked ? handleSelectAll() : handleDeselectAll()}
             />
             <span>全选</span>
           </label>
