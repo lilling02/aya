@@ -1,5 +1,15 @@
-import { makeAutoObservable, runInAction } from 'mobx'
+import { makeAutoObservable, runInAction, toJS } from 'mobx'
+import { dataUrl } from 'licia/dataUrl'
 import { invoke } from '../../preload/main'
+
+interface IpcGetDevices {
+  id: string
+  serialno: string
+  name: string
+  type: 'emulator' | 'device' | 'offline' | 'unauthorized' | 'unknown'
+  androidVersion: string
+  sdkVersion: string
+}
 
 export interface IWorkspaceDevice {
   id: string
@@ -50,6 +60,59 @@ export default class WorkspaceStore {
 
   async saveHistory() {
     await invoke('setMainStore', 'commandHistory', JSON.stringify(this.commandHistory))
+  }
+
+  async syncDevices() {
+    try {
+      const devices = await invoke<IpcGetDevices[]>('getDevices')
+      devices.forEach(device => {
+        const existing = this.devices.get(device.id)
+        this.updateDevice({
+          ...device,
+          isOnline: device.type !== 'offline',
+          screenshot: existing?.screenshot,
+          lastScreenshotTime: existing?.lastScreenshotTime,
+        })
+      })
+    } catch (e) {
+      console.error('Failed to sync devices:', e)
+    }
+  }
+
+  async captureScreenshot(deviceId: string) {
+    try {
+      const data = await invoke<Uint8Array>('screencap', deviceId)
+      const url = dataUrl.stringify(data, 'image/png')
+      const device = this.devices.get(deviceId)
+      if (device) {
+        runInAction(() => {
+          device.screenshot = url
+          device.lastScreenshotTime = Date.now()
+          device.isOnline = true
+        })
+      }
+    } catch (e) {
+      console.error('Failed to capture screenshot:', e)
+    }
+  }
+
+  registerDeviceChangeListener() {
+    invoke('on', 'changeMemStore', (key: string, value: any) => {
+      if (key === 'devices') {
+        runInAction(() => {
+          const devices = JSON.parse(value)
+          devices.forEach((device: IpcGetDevices) => {
+            const existing = this.devices.get(device.id)
+            this.updateDevice({
+              ...device,
+              isOnline: device.type !== 'offline',
+              screenshot: existing?.screenshot,
+              lastScreenshotTime: existing?.lastScreenshotTime,
+            })
+          })
+        })
+      }
+    })
   }
 
   updateDevice(device: IWorkspaceDevice) {
