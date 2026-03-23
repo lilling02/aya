@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable, runInAction } from 'mobx'
 import { invoke } from '../../preload/main'
 
 export interface IWorkspaceDevice {
@@ -22,6 +22,8 @@ export interface ICommandHistory {
   alias?: string
 }
 
+const MAX_HISTORY = 100
+
 export default class WorkspaceStore {
   devices: Map<string, IWorkspaceDevice> = new Map()
   selectedDeviceIds: Set<string> = new Set()
@@ -37,9 +39,13 @@ export default class WorkspaceStore {
     try {
       const history = await invoke<string>('getMainStore', 'commandHistory')
       if (history) {
-        this.commandHistory = JSON.parse(history)
+        runInAction(() => {
+          this.commandHistory = JSON.parse(history)
+        })
       }
-    } catch {}
+    } catch (e) {
+      console.error('Failed to load history:', e)
+    }
   }
 
   async saveHistory() {
@@ -79,8 +85,8 @@ export default class WorkspaceStore {
       isFavorite: false,
     }
     this.commandHistory.unshift(entry)
-    if (this.commandHistory.length > 100) {
-      this.commandHistory = this.commandHistory.slice(0, 100)
+    if (this.commandHistory.length > MAX_HISTORY) {
+      this.commandHistory = this.commandHistory.slice(0, MAX_HISTORY)
     }
     this.saveHistory()
   }
