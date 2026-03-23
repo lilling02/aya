@@ -65,13 +65,15 @@ export default class WorkspaceStore {
   async syncDevices() {
     try {
       const devices = await invoke<IpcGetDevices[]>('getDevices')
-      devices.forEach(device => {
-        const existing = this.devices.get(device.id)
-        this.updateDevice({
-          ...device,
-          isOnline: device.type !== 'offline',
-          screenshot: existing?.screenshot,
-          lastScreenshotTime: existing?.lastScreenshotTime,
+      runInAction(() => {
+        devices.forEach(device => {
+          const existing = this.devices.get(device.id)
+          this.updateDevice({
+            ...device,
+            isOnline: device.type !== 'offline',
+            screenshot: existing?.screenshot,
+            lastScreenshotTime: existing?.lastScreenshotTime,
+          })
         })
       })
     } catch (e) {
