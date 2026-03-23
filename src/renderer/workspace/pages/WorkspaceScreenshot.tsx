@@ -1,5 +1,10 @@
 import Workspace from './Workspace'
+import styles from './Workspace.module.scss'
 
 export default function WorkspaceScreenshot() {
-  return <Workspace type="screenshot" />
+  return (
+    <div className={styles.workspace}>
+      <Workspace type="screenshot" />
+    </div>
+  )
 }

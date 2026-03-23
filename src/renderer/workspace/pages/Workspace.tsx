@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import styles from './Workspace.module.scss'
 
 interface Props {
   type: 'screenshot' | 'cmd'
@@ -6,7 +7,7 @@ interface Props {
 
 export default observer(function Workspace({ type }: Props) {
   return (
-    <div className="workspace">
+    <div className={styles.workspace}>
       {type === 'screenshot' ? 'Screenshot Overview' : 'Command Line'}
     </div>
   )
