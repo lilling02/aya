@@ -10,8 +10,12 @@ import store from '../../store'
 import { t } from 'common/util'
 import each from 'licia/each'
 import ToolbarIcon from 'share/renderer/components/ToolbarIcon'
+import ScrcpyV2SettingsModal from './ScrcpyV2SettingsModal'
+import { useState } from 'react'
 
 export default observer(function Device() {
+  const [scrcpyV2ModalVisible, setScrcpyV2ModalVisible] = useState(false)
+
   let deviceOptions: types.PlainObj<string> = {}
   let deviceDisabled = false
   if (!isEmpty(store.devices)) {
@@ -24,8 +28,34 @@ export default observer(function Device() {
     deviceDisabled = true
   }
 
+  async function handleScrcpyV2Confirm(settings: { maxSize: number; maxFps: number; videoCodec: string }) {
+    if (!store.device) return
+
+    // 保存设置到 screencastStore
+    const deviceSettings = await main.getScreencastStore('settings') || {}
+    deviceSettings[store.device.id] = {
+      ...deviceSettings[store.device.id],
+      ...settings,
+    }
+    await main.setScreencastStore('settings', deviceSettings)
+
+    // 启动投屏V2
+    if (main.startScrcpyV2) {
+      main.startScrcpyV2(store.device.id).catch((e: any) => {
+        console.error('Failed to start scrcpy v2', e)
+        alert(`启动失败: ${e.message}`)
+      })
+    }
+  }
+
   return (
     <>
+      <ScrcpyV2SettingsModal
+        visible={scrcpyV2ModalVisible}
+        deviceId={store.device?.id || ''}
+        onClose={() => setScrcpyV2ModalVisible(false)}
+        onConfirm={handleScrcpyV2Confirm}
+      />
       <LunaToolbar
         className={Style.container}
         onChange={(key, val) => {
@@ -56,29 +86,12 @@ export default observer(function Device() {
           icon="external-link"
           disabled={!store.device}
           title="Screencast V2"
-          onClick={async () => {
-             if (store.device) {
-               console.log('Clicked Screencast V2', store.device.id)
-               
-               // 先尝试选择路径（如果没有保存的路径或路径无效）
-               if (main.selectScrcpyPath) {
-                 const path = await main.selectScrcpyPath()
-                 if (!path) {
-                   // 用户取消了选择
-                   return
-                 }
-               }
-               
-               if (main.startScrcpyV2) {
-                 main.startScrcpyV2(store.device.id).catch((e: any) => {
-                   console.error('Failed to start scrcpy v2', e)
-                   alert(`启动失败: ${e.message}`)
-                 })
-               } else {
-                 alert('Error: Function not found. Please restart the app completely.')
-               }
-             }
-           }}
+          onClick={() => {
+            if (store.device) {
+              console.log('Clicked Screencast V2', store.device.id)
+              setScrcpyV2ModalVisible(true)
+            }
+          }}
         />
       </LunaToolbar>
     </>
