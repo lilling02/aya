@@ -177,5 +177,6 @@
   "source": "Source",
   "destination": "Destination",
   "duration": "Duration",
-  "preview": "Preview"
+  "preview": "Preview",
+  "workbench": "Workbench"
 }
