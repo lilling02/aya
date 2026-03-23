@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { workspaceStore } from '../../store'
 import ScreenshotCard from '../ScreenshotCard/ScreenshotCard'
@@ -17,6 +17,7 @@ const REFRESH_OPTIONS = [
 
 export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
   const intervalRef = useRef<number | undefined>(undefined)
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; deviceId: string } | null>(null)
   const devices = [...workspaceStore.devices.values()]
   const onlineCount = devices.filter(d => d.isOnline).length
   const totalCount = devices.length
@@ -28,12 +29,20 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
 
   const handleContextMenu = useCallback((device: typeof devices[0], e: React.MouseEvent) => {
     e.preventDefault()
-    onOpenPreview(device.id)
-  }, [onOpenPreview])
+    e.stopPropagation()
+    setContextMenu({ x: e.clientX, y: e.clientY, deviceId: device.id })
+  }, [])
 
   const handleIntervalChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = Number(e.target.value)
     workspaceStore.refreshInterval = value
+  }, [])
+
+  // Close context menu on outside click
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null)
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
   }, [])
 
   // Set up refresh interval
@@ -97,6 +106,18 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
           ))}
         </div>
       </div>
+
+      {contextMenu && (
+        <div
+          className="context-menu"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="menu-item" onClick={() => onOpenPreview(contextMenu.deviceId)}>
+            打开设备预览
+          </div>
+        </div>
+      )}
     </div>
   )
 })
