@@ -17,6 +17,7 @@ export default observer(function CommandLine() {
   const [showHistory, setShowHistory] = useState(false)
   const [deviceOutputs, setDeviceOutputs] = useState<Map<string, string[]>>(new Map())
   const [deviceShells, setDeviceShells] = useState<Map<string, DeviceShell>>(new Map())
+  const activeSessions = useRef<Set<string>>(new Set())
   const outputRef = useRef<HTMLDivElement>(null)
 
   const devices = Array.from(workspaceStore.devices.values())
@@ -55,8 +56,8 @@ export default observer(function CommandLine() {
   // Cleanup shells on unmount
   useEffect(() => {
     return () => {
-      for (const shell of deviceShells.values()) {
-        invoke('destroyShell', shell.sessionId).catch(() => {
+      for (const sessionId of activeSessions.current) {
+        invoke('destroyShell', sessionId).catch(() => {
           // Ignore errors during cleanup
         })
       }
@@ -96,6 +97,7 @@ export default observer(function CommandLine() {
         try {
           const sessionId = await invoke<string>('createShell', deviceId)
           shell = { sessionId, output: [] }
+          activeSessions.current.add(sessionId)
           setDeviceShells(prev => new Map(prev).set(deviceId, shell!))
         } catch (err) {
           console.error(`Failed to create shell for device ${deviceId}:`, err)
