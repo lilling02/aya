@@ -45,6 +45,12 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
     return () => document.removeEventListener('click', handleClick)
   }, [])
 
+  // Calculate clamped menu position to prevent viewport overflow
+  const menuStyle = contextMenu ? {
+    left: Math.min(contextMenu.x, window.innerWidth - 160),
+    top: Math.min(contextMenu.y, window.innerHeight - 100),
+  } : {}
+
   // Set up refresh interval
   useEffect(() => {
     const interval = workspaceStore.refreshInterval
@@ -110,7 +116,7 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
       {contextMenu && (
         <div
           className="context-menu"
-          style={{ left: contextMenu.x, top: contextMenu.y }}
+          style={menuStyle}
           onClick={e => e.stopPropagation()}
         >
           <div className="menu-item" onClick={() => {
