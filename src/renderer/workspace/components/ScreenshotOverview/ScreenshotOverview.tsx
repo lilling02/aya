@@ -113,7 +113,10 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={e => e.stopPropagation()}
         >
-          <div className="menu-item" onClick={() => onOpenPreview(contextMenu.deviceId)}>
+          <div className="menu-item" onClick={() => {
+  onOpenPreview(contextMenu.deviceId)
+  setContextMenu(null)
+}}>
             打开设备预览
           </div>
         </div>
