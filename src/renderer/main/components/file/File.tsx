@@ -367,7 +367,7 @@ export default observer(function File() {
         <ToolbarIcon
           icon="manage"
           title={t('bookmarks')}
-          
+
           onClick={(e) => {
             const template: any[] = []
             if (isEmpty(file.bookmarks)) {
@@ -381,6 +381,22 @@ export default observer(function File() {
               })
             }
             contextMenu(e, template)
+          }}
+          disabled={!device}
+        />
+        <ToolbarIcon
+          icon="unlock"
+          title="Root"
+          onClick={async () => {
+            if (!device) {
+              return
+            }
+            try {
+              await main.root(device.id)
+              notify(t('rootSuccess'), { icon: 'success' })
+            } catch (e) {
+              notify(t('rootFailed', { error: String(e) }), { icon: 'error' })
+            }
           }}
           disabled={!device}
         />

@@ -11,6 +11,7 @@ interface Props {
 }
 
 const REFRESH_OPTIONS = [
+  { label: '1s', value: 1000 },
   { label: '5s', value: 5000 },
   { label: '10s', value: 10000 },
   { label: '30s', value: 30000 },
@@ -39,6 +40,12 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
   const handleIntervalChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = Number(e.target.value)
     workspaceStore.refreshInterval = value
+  }, [])
+
+  const handleColumnsChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = Number(e.target.value)
+    workspaceStore.gridColumns = value
+    workspaceStore.saveSettings()
   }, [])
 
   const handleScrcpyV2Click = useCallback((deviceId: string) => {
@@ -125,22 +132,40 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
         <div className={Style.deviceCount}>
           {onlineCount} / {totalCount} 在线
         </div>
-        <div className={Style.refreshSelector}>
-          <select
-            value={workspaceStore.refreshInterval}
-            onChange={handleIntervalChange}
-          >
-            {REFRESH_OPTIONS.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+        <div className={Style.toolbarControls}>
+          <div className={Style.controlGroup}>
+            <label>每行</label>
+            <select
+              value={workspaceStore.gridColumns}
+              onChange={handleColumnsChange}
+            >
+              {[2, 3, 4, 5, 6].map(n => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+            <label>列</label>
+          </div>
+          <div className={Style.controlGroup}>
+            <label>刷新</label>
+            <select
+              value={workspaceStore.refreshInterval}
+              onChange={handleIntervalChange}
+            >
+              {REFRESH_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
       <div className={Style.gridContainer}>
-        <div className={Style.deviceGrid}>
+        <div
+          className={Style.deviceGrid}
+          style={{ gridTemplateColumns: `repeat(${workspaceStore.gridColumns}, 1fr)` }}
+        >
           {devices.map(device => (
             <ScreenshotCard
               key={device.id}

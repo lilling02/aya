@@ -45,9 +45,15 @@ export default observer(function ScreenshotCard({ device, onRefresh, onPreview, 
     >
       <button className={Style.refreshBtn} onClick={handleRefresh} title="刷新截图" />
 
-      <div className={Style.screenshotWrapper}>
+      <div
+        className={Style.screenshotWrapper}
+      >
         {device.screenshot ? (
-          <img src={device.screenshot} alt={`${device.name} 截图`} onClick={handlePreview} />
+          <img
+            src={device.screenshot}
+            alt={`${device.name} 截图`}
+            onClick={handlePreview}
+          />
         ) : (
           <div className={Style.noScreenshot}>无截图</div>
         )}

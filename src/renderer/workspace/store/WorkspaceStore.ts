@@ -38,12 +38,33 @@ export default class WorkspaceStore {
   selectedDeviceIds: Set<string> = new Set()
   commandHistory: ICommandHistory[] = []
   refreshInterval: number = 10000 // 10s default
+  gridColumns: number = 4
 
   constructor() {
     makeAutoObservable(this)
     this.loadHistory()
+    this.loadSettings()
     this.syncDevices()
     this.registerDeviceChangeListener()
+  }
+
+  async loadSettings() {
+    try {
+      const columns = await main.getMainStore('gridColumns')
+      runInAction(() => {
+        if (columns !== undefined) this.gridColumns = Number(columns)
+      })
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  async saveSettings() {
+    try {
+      await main.setMainStore('gridColumns', String(this.gridColumns))
+    } catch (e) {
+      // ignore
+    }
   }
 
   async loadHistory() {

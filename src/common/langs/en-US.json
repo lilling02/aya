@@ -162,6 +162,8 @@
   "componentNotSelected": "Component not selected",
   "rootMode": "Root Mode",
   "rootModeErr": "Failed to switch root mode, please check if the device is rooted",
+  "rootSuccess": "Root success",
+  "rootFailed": "Root failed: {{error}}",
   "expandAll": "Expand All",
   "collapseAll": "Collapse All",
   "showAttr": "Show Attribute",

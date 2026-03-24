@@ -183,8 +183,28 @@ export default observer(function CommandLine() {
 
         <div className={Style.sidebar} style={{ backgroundColor: sidebarBg, color: sidebarText }}>
           <div className={Style.sidebarHeader}>
-            <span>设备列表</span>
-            <span className={Style.deviceCount}>{devices.length}</span>
+            <div className={Style.headerLeft}>
+              <span>设备列表</span>
+              <span className={Style.deviceCount}>{devices.length}</span>
+            </div>
+            <div className={Style.headerActions}>
+              <label className={Style.selectorItem}>
+                <input
+                  type="checkbox"
+                  checked={selectedCount === devices.length && devices.length > 0}
+                  onChange={e => e.target.checked ? handleSelectAll() : handleDeselectAll()}
+                />
+                <span>全选</span>
+              </label>
+              <label className={Style.selectorItem}>
+                <input
+                  type="checkbox"
+                  checked={selectedCount === 0}
+                  onChange={handleDeselectAll}
+                />
+                <span>全不选</span>
+              </label>
+            </div>
           </div>
           <div className={Style.deviceList}>
             {devices.length > 0 ? (
@@ -193,7 +213,9 @@ export default observer(function CommandLine() {
                   key={device.id}
                   device={device}
                   output={(deviceOutputs.get(device.id) || '').split('\n')}
+                  selected={workspaceStore.selectedDeviceIds.has(device.id)}
                   onClick={handleMiniPanelClick}
+                  onSelect={handleToggleDevice}
                 />
               ))
             ) : (
@@ -207,37 +229,7 @@ export default observer(function CommandLine() {
 
       <div className={Style.broadcastBar} style={{ backgroundColor: terminalBg, color: sidebarText }}>
         <div className={Style.deviceSelector}>
-          <label className={Style.selectorItem}>
-            <input
-              type="checkbox"
-              checked={selectedCount === devices.length && devices.length > 0}
-              onChange={e => e.target.checked ? handleSelectAll() : handleDeselectAll()}
-            />
-            <span>全选</span>
-          </label>
-          <label className={Style.selectorItem}>
-            <input
-              type="checkbox"
-              checked={selectedCount === 0}
-              onChange={handleDeselectAll}
-            />
-            <span>全不选</span>
-          </label>
-          <div className={Style.selectorDivider} />
-          {devices.slice(0, 3).map(device => (
-            <label key={device.id} className={Style.deviceCheckbox}>
-              <input
-                type="checkbox"
-                checked={workspaceStore.selectedDeviceIds.has(device.id)}
-                onChange={() => handleToggleDevice(device.id)}
-              />
-              <span className={className(Style.statusDot, device.online ? Style.online : Style.offline)} />
-              <span className={Style.deviceName}>{device.name}</span>
-            </label>
-          ))}
-          {devices.length > 3 && (
-            <span className={Style.moreDevices}>+{devices.length - 3}</span>
-          )}
+          <span className={Style.selectedInfo}>已选 {selectedCount} 个设备</span>
         </div>
 
         <form className={Style.commandForm} onSubmit={handleCommandSubmit}>

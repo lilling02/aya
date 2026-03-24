@@ -10,7 +10,6 @@ import Webview from './components/webview/Webview'
 import Application from './components/application/Application'
 import File from './components/file/File'
 import Layout from './components/layout/Layout'
-import Remote from './components/remote/Remote'
 import Workbench from './components/workbench/Workbench'
 import Style from './App.module.scss'
 import { useState, PropsWithChildren, FC } from 'react'
@@ -58,9 +57,6 @@ export default observer(function App() {
             </Panel>
             <Panel panel="layout">
               <Layout />
-            </Panel>
-            <Panel panel="remote">
-              <Remote />
             </Panel>
             <Panel panel="workbench">
               <Workbench />

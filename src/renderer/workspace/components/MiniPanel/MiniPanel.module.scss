@@ -12,6 +12,11 @@
   &:hover {
     border-color: #007acc;
   }
+
+  &.selected {
+    border-color: var(--color-primary, #007acc);
+    background-color: #2d2d2d;
+  }
 }
 
 .miniHeader {
@@ -21,6 +26,11 @@
   padding: 8px 12px;
   background-color: #252526;
   border-bottom: 1px solid #3a3a3a;
+}
+
+.checkbox {
+  cursor: pointer;
+  accent-color: var(--color-primary, #007acc);
 }
 
 .statusDot {

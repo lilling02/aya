@@ -14,6 +14,8 @@
   background: var(--panel-bg);
   border-radius: 8px;
   border: 1px solid var(--border-color);
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .deviceCount {
@@ -21,15 +23,31 @@
   color: var(--text-color);
 }
 
-.refreshSelector {
-  select {
-    padding: 6px 12px;
+.toolbarControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-color);
+
+  label {
+    white-space: nowrap;
+  }
+
+  select, input {
+    padding: 4px 8px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
     background: var(--color-bg-container);
     color: var(--text-color);
     font-size: 13px;
-    cursor: pointer;
 
     &:hover {
       border-color: var(--primary-color);
@@ -38,7 +56,6 @@
     &:focus {
       outline: none;
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
     }
   }
 }
@@ -50,16 +67,7 @@
 
 .deviceGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-
-  @media (max-width: 1200px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  @media (max-width: 800px) {
-    grid-template-columns: 1fr;
-  }
 }
 
 .emptyState {
