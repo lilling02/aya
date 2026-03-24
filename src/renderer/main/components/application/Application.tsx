@@ -418,31 +418,16 @@ export default observer(function Application() {
             </div>
             <div
               className={Style.button}
-              onClick={() => showInfo(selectedPackage.packageName)}
-            >
-              <span className="icon-info" /> {t('packageInfo')}
-            </div>
-            <div
-              className={Style.button}
               onClick={async () => {
-                const { canceled, filePath } = await main.showSaveDialog({
-                  defaultPath: `${selectedPackage.packageName}-${selectedPackage.versionName}.apk`,
-                })
-                if (canceled) {
-                  return
-                }
-                await main.pullFile(
-                  device!.id,
-                  selectedPackage.apkPath,
-                  filePath
+                const result = await LunaModal.confirm(
+                  confirmText('stopPackageConfirm', selectedPackage)
                 )
-                notify(t('apkExported', { path: filePath }), {
-                  icon: 'success',
-                  duration: 5000,
-                })
+                if (result) {
+                  await main.stopPackage(device!.id, selectedPackage.packageName)
+                }
               }}
             >
-              <span className="icon-save" /> {t('exportApk')}
+              <span className="icon-power" /> {t('stop')}
             </div>
             <div
               className={Style.button}
@@ -475,16 +460,31 @@ export default observer(function Application() {
             </div>
             <div
               className={Style.button}
+              onClick={() => showInfo(selectedPackage.packageName)}
+            >
+              <span className="icon-info" /> {t('packageInfo')}
+            </div>
+            <div
+              className={Style.button}
               onClick={async () => {
-                const result = await LunaModal.confirm(
-                  confirmText('stopPackageConfirm', selectedPackage)
-                )
-                if (result) {
-                  await main.stopPackage(device!.id, selectedPackage.packageName)
+                const { canceled, filePath } = await main.showSaveDialog({
+                  defaultPath: `${selectedPackage.packageName}-${selectedPackage.versionName}.apk`,
+                })
+                if (canceled) {
+                  return
                 }
+                await main.pullFile(
+                  device!.id,
+                  selectedPackage.apkPath,
+                  filePath
+                )
+                notify(t('apkExported', { path: filePath }), {
+                  icon: 'success',
+                  duration: 5000,
+                })
               }}
             >
-              <span className="icon-power" /> {t('stop')}
+              <span className="icon-save" /> {t('exportApk')}
             </div>
             <div
               className={Style.button}

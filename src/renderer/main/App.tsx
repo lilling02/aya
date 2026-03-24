@@ -1,3 +1,4 @@
+import DeviceList from './components/DeviceList/DeviceList'
 import Toolbar from './components/toolbar/Toolbar'
 import Logcat from './components/logcat/Logcat'
 import Shell from './components/shell/Shell'
@@ -20,6 +21,7 @@ export default observer(function App() {
 
   return (
     <>
+      <DeviceList />
       <Toolbar />
       {store.ready && (
         <div className={Style.workspace}>
