@@ -10,3 +10,7 @@ server/**/build/
 local.properties
 
 build/*.provisionprofile
+pnpm-workspace.yaml
+pnpm-lock.yaml
+docs/*
+src/share

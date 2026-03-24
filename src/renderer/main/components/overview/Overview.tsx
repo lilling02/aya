@@ -26,6 +26,10 @@ export default observer(function Overview() {
     types.PlainObj<string | number | boolean>
   >({})
   const [fontAdjustModalVisible, setFontAdjustModalVisible] = useState(false)
+  const [deviceCode, setDeviceCode] = useState('')
+  const [deviceInfo, setDeviceInfo] = useState('')
+  const [deviceInfoExpanded, setDeviceInfoExpanded] = useState(false)
+  const [miniRunVersion, setMiniRunVersion] = useState('')
 
   const { device } = store
 
@@ -41,7 +45,13 @@ export default observer(function Overview() {
     try {
       setIsLoading(true)
       const overview = await main.getOverview(device.id)
+      const code = await main.getDeviceCode(device.id)
+      const miniRunVer = await main.getMiniRunVersion(device.id)
       setOverview(overview)
+      setDeviceCode(code)
+      const deviceInfo = await main.getDeviceInfo(device.id)
+      setDeviceInfo(deviceInfo)
+      setMiniRunVersion(miniRunVer)
     } catch {
       notify(t('commonErr'), { icon: 'error' })
     }
@@ -117,6 +127,26 @@ export default observer(function Overview() {
           {item('Wi-Fi', overview.wifi, 'wifi')}
           {item(t('ipAddress'), overview.ip, 'browser')}
           {item(t('macAddress'), overview.mac, 'browser')}
+        </div>
+        <div className={Style.row}>
+          {item(t('astVersion'), overview.astVersion, 'info')}
+          {item(t('deviceCode'), deviceCode, 'info')}
+          {item(t('miniRunVersion'), miniRunVersion, 'info')}
+        </div>
+        <div className={Style.deviceInfoContainer}>
+          <div
+            className={Style.deviceInfoHeader}
+            onClick={() => setDeviceInfoExpanded(!deviceInfoExpanded)}
+          >
+            <span className={`icon-info`}></span>
+            &nbsp;{t('deviceInfo')}
+            <span className={deviceInfoExpanded ? Style.arrowExpanded : Style.arrowCollapsed}>
+              ▼
+            </span>
+          </div>
+          {deviceInfoExpanded && deviceInfo && (
+            <pre className={Style.deviceInfoContent}>{deviceInfo}</pre>
+          )}
         </div>
         <FontAdjustModal
           visible={fontAdjustModalVisible}

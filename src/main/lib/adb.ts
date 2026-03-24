@@ -25,6 +25,7 @@ import * as logcat from './adb/logcat'
 import * as shellAdb from './adb/shell'
 import * as server from './adb/server'
 import * as scrcpy from './adb/scrcpy'
+import * as scrcpy_v2 from './adb/scrcpy_v2'
 import * as packageAdb from './adb/package'
 import * as file from './adb/file'
 import * as fps from './adb/fps'
@@ -40,6 +41,9 @@ import {
   IpcInputKey,
   IpcPairDevice,
   IpcScreencap,
+  IpcGetDeviceCode,
+  IpcGetDeviceInfo,
+  IpcGetMiniRunVersion,
 } from 'common/types'
 import path from 'node:path'
 import childProcess from 'node:child_process'
@@ -85,15 +89,28 @@ async function getOverview(deviceId: string) {
   const device = await client.getDevice(deviceId)
   const properties = await device.getProperties()
   const cpus = await getCpus(deviceId, false)
-  const [kernelVersion, fontScale, wifi] = await shell(deviceId, [
+  const [kernelVersion, fontScale, wifi, astVersion] = await shell(deviceId, [
     'uname -r',
     'settings get system font_scale',
     'dumpsys wifi',
+    'pm dump com.lkm.ad_cross | grep version',
   ])
 
   let ssidMatch = wifi.match(/mWifiInfo\s+SSID: "?(.+?)"?,/)
   if (ssidMatch && ssidMatch[1] === '<unknown ssid>') {
     ssidMatch = null
+  }
+
+  // 解析 AST 软件版本
+  let astVersionStr = ''
+  if (astVersion) {
+    const versionNameMatch = astVersion.match(/versionName=([^\s]+)/)
+    const versionCodeMatch = astVersion.match(/versionCode=([^\s]+)/)
+    if (versionNameMatch && versionCodeMatch) {
+      astVersionStr = `${versionNameMatch[1]} (${versionCodeMatch[1]})`
+    } else if (versionNameMatch) {
+      astVersionStr = versionNameMatch[1]
+    }
   }
 
   return {
@@ -108,10 +125,47 @@ async function getOverview(deviceId: string) {
     fontScale: fontScale === 'null' ? 0 : toNum(fontScale),
     wifi: ssidMatch ? ssidMatch[1] : '',
     root: await isRooted(deviceId),
+    astVersion: astVersionStr,
     ...(await getIpAndMac(deviceId)),
     ...(await getStorage(deviceId)),
     ...(await getMemory(deviceId)),
     ...(await getScreen(deviceId)),
+  }
+}
+
+const getDeviceCode: IpcGetDeviceCode = async function (deviceId) {
+  try {
+    const result = await shell(deviceId, 'cat /sdcard/ast-shard/uncode')
+    return result as string
+  } catch (e) {
+    logger.error('getDeviceCode error', e)
+    return ''
+  }
+}
+
+const getDeviceInfo: IpcGetDeviceInfo = async function (deviceId) {
+  const VENDOR = `VENDOR=$(dumpsys activity broadcasts 2>/dev/null | grep -E 'android.intent.myservice.poweroff|com.innohi.action.SET_POWERONOFF|com.ys.systemui.poweroff|android.q_zheng.action.POWERONOFF' | head -1 | sed -e 's/.*android.intent.myservice.poweroff.*/xc/' -e 's/.*com.innohi.action.SET_POWERONOFF.*/ynh/' -e 's/.*com.innohi.action.SET_POWERONOFF.*/ys/' -e 's/.*android.q_zheng.action.POWERONOFF.*/sf/'); if [ -z "$VENDOR" ]; then VENDOR="unknown"; fi; ROM_SHOW_ID=$(getprop ro.build.display.id 2>/dev/null | tr -d '[:space:]'); CPU_MODEL=$(cat /proc/cpuinfo 2>/dev/null | grep -i "hardware" | cut -d: -f2 | sed 's/^[ \t]*//;s/[ \t]*$//'); RAM_SIZE=$(cat /proc/meminfo 2>/dev/null | grep -i "memtotal" | awk '{print $2}'); df /data 2>/dev/null | tail -1 | awk -v vendor="$VENDOR" -v cpu="$CPU_MODEL" -v rom="$ROM_SHOW_ID" -v ram="$RAM_SIZE" '{total_gb=$2/1024/1024; free_gb=$4/1024/1024; printf "设备信息:\\n主板厂家: %s\\ncpu: %s\\n固件版本号: %s\\n运存: %skB\\n总空间GB: %.2f, 可用空间GB: %.2f\\n", vendor, cpu, rom, ram, total_gb, free_gb}' || df / 2>/dev/null | tail -1 | awk -v vendor="$VENDOR" -v cpu="$CPU_MODEL" -v rom="$ROM_SHOW_ID" -v ram="$RAM_SIZE" '{total_gb=$2/1024/1024; free_gb=$4/1024/1024; printf "设备信息:\\n主板厂家: %s\\ncpu: %s\\n固件版本号: %s\\n运存: %skB\\n总空间GB: %.2f, 可用空间GB: %.2f\\n", vendor, cpu, rom, ram, total_gb, free_gb}'`
+  // const cmd = `VENDOR=$(dumpsys activity broadcasts 2>/dev/null | grep -E 'android.intent.myservice.poweroff|com.innohi.action.SET_POWERONOFF|com.ys.systemui.poweroff|android.q_zheng.action.POWERONOFF' | head -1 | sed -e 's/.*android.intent.myservice.poweroff.*/xc/' -e 's/.*com.innohi.action.SET_POWERONOFF.*/ynh/' -e 's/.*com.ys.systemui.poweroff.*/ys/' -e 's/.*android.q_zheng.action.POWERONOFF.*/sf/'); if [ -z "$VENDOR" ]; then VENDOR="unknown"; fi; ROM_SHOW_ID=$(getprop ro.build.display.id 2>/dev/null | tr -d '[:space:]'); CPU_MODEL=$(cat /proc/cpuinfo 2>/dev/null | grep -i "hardware" | cut -d: -f2 | sed 's/^[ \t]*//;s/[ \t]*$//'); RAM_SIZE=$(cat /proc/meminfo 2>/dev/null | grep -i "memtotal" | awk '{print $2}'); df /data 2>/dev/null | tail -1 | awk -v vendor="$VENDOR" -v cpu="$CPU_MODEL" -v rom="$ROM_SHOW_ID" -v ram="$RAM_SIZE" '{total_gb=$2/1024/1024; free_gb=$4/1024/1024; printf "设备信息:\n主板厂家: %s\ncpu: %s\n固件版本号: %s\n运存: %skB\n总空间GB: %.2f, 可用空间GB: %.2f\n", vendor, cpu, rom, ram, total_gb, free_gb}' || df / 2>/dev/null | tail -1 | awk -v vendor="$VENDOR" -v cpu="$CPU_MODEL" -v rom="$ROM_SHOW_ID" -v ram="$RAM_SIZE" '{total_gb=$2/1024/1024; free_gb=$4/1024/1024; printf "设备信息:\n主板厂家: %s\ncpu: %s\n固件版本号: %s\n运存: %skB\n总空间GB: %.2f, 可用空间GB: %.2f\n", vendor, cpu, rom, ram, total_gb, free_gb}'`
+  try {
+    const result = await shell(deviceId, VENDOR)
+    return (result || '').trim()
+  } catch (e) {
+    logger.error('getDeviceInfo error', e)
+    return ''
+  }
+}
+
+const getMiniRunVersion: IpcGetMiniRunVersion = async function (deviceId) {
+  try {
+    const result = await shell(
+      deviceId,
+      'su 0 cat /data/data/com.lkm.ad_cross/plugins/miniRun/assets/dist/astConfig.json'
+    )
+    const json = JSON.parse(result as string)
+    return json.version || ''
+  } catch (e) {
+    logger.error('getMiniRunVersion error', e)
+    return ''
   }
 }
 
@@ -411,6 +465,7 @@ export async function init() {
   shellAdb.init(client)
   server.init(client)
   scrcpy.init(client)
+  scrcpy_v2.init()
   packageAdb.init(client)
   file.init(client)
   fps.init()
@@ -433,4 +488,7 @@ export async function init() {
   handleEvent('startWireless', startWireless)
   handleEvent('restartAdbServer', restartAdbServer)
   handleEvent('pairDevice', pairDevice)
+  handleEvent('getDeviceCode', getDeviceCode)
+  handleEvent('getDeviceInfo', getDeviceInfo)
+  handleEvent('getMiniRunVersion', getMiniRunVersion)
 }

@@ -17,7 +17,7 @@ export default observer(function SettingsModal(props: IModalProps) {
   function onChange(key, val) {
     if (key === 'videoBitRate') {
       val *= 1000000
-    } else if (key === 'maxSize') {
+    } else if (key === 'maxSize' || key === 'maxFps') {
       val = toNum(val)
     }
     store.setSettings(key, val)
@@ -50,6 +50,28 @@ export default observer(function SettingsModal(props: IModalProps) {
             1280: '1280',
             1920: '1920',
             [t('actualSize')]: '0',
+          }}
+        />
+        <LunaSettingSelect
+          keyName="maxFps"
+          value={toStr(store.settings.maxFps)}
+          title={t('maxFps')}
+          options={{
+            [t('unlimited')]: '0',
+            30: '30',
+            60: '60',
+            90: '90',
+            120: '120',
+          }}
+        />
+        <LunaSettingSelect
+          keyName="videoCodec"
+          value={store.settings.videoCodec}
+          title={t('videoCodec')}
+          options={{
+            h264: 'h264',
+            h265: 'h265',
+            av1: 'av1',
           }}
         />
         <LunaSettingButton

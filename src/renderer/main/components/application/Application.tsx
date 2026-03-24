@@ -1,3 +1,4 @@
+import LunaSplitPane, { LunaSplitPaneItem } from 'luna-split-pane/react'
 import LunaToolbar, {
   LunaToolbarCheckbox,
   LunaToolbarInput,
@@ -46,6 +47,11 @@ export default observer(function Application() {
   const [dropHighlight, setDropHighlight] = useState(false)
   const dataGridRef = useRef<DataGrid>(null)
   const [packageInfoModalVisible, setPackageInfoModalVisible] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(true)
+  const [selectedPackage, setSelectedPackage] = useState<IPackageInfo | null>(
+    null
+  )
+  const [sidebarWeight, setSidebarWeight] = useState(30)
   const [isOpenEffectAnimating, setIsOpenEffectAnimating] = useState(false)
   const [openEffectStyle, setOpenEffectStyle] = useState({
     left: 0,
@@ -92,7 +98,7 @@ export default observer(function Application() {
 
           return {
             info: info,
-            src: info.icon || defaultIcon,
+            src: defaultIcon,
             name: info.label,
             style,
           }
@@ -117,7 +123,7 @@ export default observer(function Application() {
         }
         iconsRef.current[idx] = {
           info: info,
-          src: info.icon || defaultIcon,
+          src: defaultIcon,
           name: info.label,
           style,
         }
@@ -308,7 +314,7 @@ export default observer(function Application() {
             store.application.set('dataGridColumns', jsonClone(columns))
           }}
           onClick={(e: any, node) => {
-            showInfo((node.data as any).packageName)
+            setSelectedPackage((node.data as any).info)
           }}
           onDoubleClick={(e: any, node) => {
             open((node.data as any).packageName)
@@ -352,8 +358,8 @@ export default observer(function Application() {
           uniqueId="packageName"
           onCreate={(dataGrid) => {
             dataGridRef.current = dataGrid
-            dataGrid.fit()
             dataGrid.setOption('columns', store.application.dataGridColumns)
+            setTimeout(() => dataGrid.fit())
           }}
         />
       ) : (
@@ -363,7 +369,7 @@ export default observer(function Application() {
           filter={filter}
           onClick={(e: any, icon) => {
             const info = (icon.data as any).info
-            showInfo(info.packageName)
+            setSelectedPackage(info)
           }}
           onDoubleClick={(e: any, icon) => {
             const info = (icon.data as any).info
@@ -391,6 +397,131 @@ export default observer(function Application() {
         style={openEffectStyle}
         onAnimationEnd={() => setIsOpenEffectAnimating(false)}
       />
+    </div>
+  )
+
+  const sidebar = (
+    <div className={Style.sidebar}>
+      {selectedPackage && (
+        <>
+          <div className={Style.header}>
+            <img src={selectedPackage.icon || defaultIcon} />
+            <div className={Style.name}>{selectedPackage.label}</div>
+            <div className={Style.package}>{selectedPackage.packageName}</div>
+          </div>
+          <div className={Style.actions}>
+            <div
+              className={Style.button}
+              onClick={() => open(selectedPackage.packageName)}
+            >
+              <span className="icon-play" /> {t('open')}
+            </div>
+            <div
+              className={Style.button}
+              onClick={() => showInfo(selectedPackage.packageName)}
+            >
+              <span className="icon-info" /> {t('packageInfo')}
+            </div>
+            <div
+              className={Style.button}
+              onClick={async () => {
+                const { canceled, filePath } = await main.showSaveDialog({
+                  defaultPath: `${selectedPackage.packageName}-${selectedPackage.versionName}.apk`,
+                })
+                if (canceled) {
+                  return
+                }
+                await main.pullFile(
+                  device!.id,
+                  selectedPackage.apkPath,
+                  filePath
+                )
+                notify(t('apkExported', { path: filePath }), {
+                  icon: 'success',
+                  duration: 5000,
+                })
+              }}
+            >
+              <span className="icon-save" /> {t('exportApk')}
+            </div>
+            <div
+              className={Style.button}
+              onClick={async () => {
+                const result = await LunaModal.confirm(
+                  confirmText('disablePackageConfirm', selectedPackage)
+                )
+                if (result) {
+                  await main.disablePackage(
+                    device!.id,
+                    selectedPackage.packageName
+                  )
+                  refresh(selectedPackage.packageName)
+                }
+              }}
+            >
+              <span className="icon-screen-off" /> {t('disablePackage')}
+            </div>
+            <div
+              className={Style.button}
+              onClick={async () => {
+                await main.enablePackage(
+                  device!.id,
+                  selectedPackage.packageName
+                )
+                refresh(selectedPackage.packageName)
+              }}
+            >
+              <span className="icon-screen-on" /> {t('enablePackage')}
+            </div>
+            <div
+              className={Style.button}
+              onClick={async () => {
+                const result = await LunaModal.confirm(
+                  confirmText('stopPackageConfirm', selectedPackage)
+                )
+                if (result) {
+                  await main.stopPackage(device!.id, selectedPackage.packageName)
+                }
+              }}
+            >
+              <span className="icon-power" /> {t('stop')}
+            </div>
+            <div
+              className={Style.button}
+              onClick={async () => {
+                const result = await LunaModal.confirm(
+                  confirmText('clearDataConfirm', selectedPackage)
+                )
+                if (result) {
+                  await main.clearPackage(device!.id, selectedPackage.packageName)
+                  notify(t('dataCleared'), { icon: 'success' })
+                  setTimeout(() => refresh(selectedPackage.packageName), 1000)
+                }
+              }}
+            >
+              <span className="icon-clear" /> {t('clearData')}
+            </div>
+            <div
+              className={Style.button}
+              onClick={async () => {
+                const result = await LunaModal.confirm(
+                  confirmText('uninstallConfirm', selectedPackage)
+                )
+                if (result) {
+                  await main.uninstallPackage(
+                    device!.id,
+                    selectedPackage.packageName
+                  )
+                  refresh()
+                  setSelectedPackage(null)
+                }
+              }}
+            >
+              <span className="icon-delete" /> {t('uninstall')}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 
@@ -479,13 +610,41 @@ export default observer(function Application() {
           disabled={isLoading || !device}
           onClick={() => refresh()}
         />
+        <LunaToolbarSeparator />
+        <ToolbarIcon
+          icon="manage"
+          title={t('toggleSidebar')}
+          state={showSidebar ? 'active' : ''}
+          onClick={() => setShowSidebar(!showSidebar)}
+        />
       </LunaToolbar>
       <div
         className={className('panel-body', {
           [Style.highlight]: dropHighlight,
         })}
       >
-        {isLoading && isEmpty(packageInfos) ? <PannelLoading /> : applications}
+        {isLoading && isEmpty(packageInfos) ? (
+          <PannelLoading />
+        ) : (
+          <LunaSplitPane
+            onResize={(weights) => {
+              if (weights.length > 1) {
+                setSidebarWeight(weights[1])
+              }
+            }}
+          >
+            <LunaSplitPaneItem minSize={200} weight={100 - sidebarWeight}>
+              {applications}
+            </LunaSplitPaneItem>
+            <LunaSplitPaneItem
+              minSize={250}
+              weight={sidebarWeight}
+              visible={showSidebar}
+            >
+              {sidebar}
+            </LunaSplitPaneItem>
+          </LunaSplitPane>
+        )}
       </div>
       {!isNull(packageInfo) && (
         <PackageInfoModal

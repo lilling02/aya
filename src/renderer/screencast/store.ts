@@ -69,6 +69,8 @@ class Store extends BaseStore {
           audio: true,
           videoBitRate: settings.videoBitRate,
           maxSize: settings.maxSize,
+          maxFps: settings.maxFps,
+          videoCodec: settings.videoCodec,
           clipboardAutosync: true,
           stayAwake: true,
         })
@@ -117,6 +119,8 @@ class Store extends BaseStore {
 const defaultSettings = {
   videoBitRate: 8000000,
   maxSize: 0,
+  maxFps: 0,
+  videoCodec: 'h264',
 }
 
 export default new Store()

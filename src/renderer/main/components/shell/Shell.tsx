@@ -150,6 +150,25 @@ export default observer(function Shell() {
 
 function getCommands() {
   const commands = [
+    [
+      '查看SDK版本',
+      'cat /data/data/com.lkm.ad_cross/plugins/miniRun/version\necho ok\n',
+    ],
+    [
+      '启动软件',
+      'am start -n com.lkm.ad_cross/com.lkm.app_ados.LaunchActivity\necho ok\n',
+    ],
+    ['关闭软件', 'am force-stop com.lkm.ad_cross\necho ok\n'],
+    [
+      '调试数据库',
+      'am broadcast -n  com.lkm.ad_cross/com.lkm.ast_main.MainConfigReceiver --es cmd debugDB --ei port 8082\necho ok\n',
+    ],
+    [
+      '强制调试webview',
+      'am start -n com.lkm.ad_cross/com.lkm.app_mini.ui.MiniLaunchActivity  --es   debugWeb "debugWeb"\necho ok\n',
+    ],
+    ['像素密度1080', 'wm density 240\necho ok\n'],
+    ['卸载软件', 'pm uninstall com.lkm.ad_cross\necho\n'],
     [t('reboot'), 'reboot\n'],
     [t('rebootRecovery'), 'reboot recovery\n'],
     [t('rebootBootloader'), 'reboot bootloader\n'],
