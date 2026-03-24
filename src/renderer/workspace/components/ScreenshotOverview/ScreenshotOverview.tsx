@@ -24,8 +24,7 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
   const totalCount = devices.length
 
   const handleRefresh = useCallback((deviceId: string) => {
-    // TODO: Implement actual screenshot refresh via IPC
-    console.log('Refresh screenshot for device:', deviceId)
+    workspaceStore.captureScreenshot(deviceId)
   }, [])
 
   const handleContextMenu = useCallback((device: typeof devices[0], e: React.MouseEvent) => {
@@ -46,6 +45,18 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
     return () => document.removeEventListener('click', handleClick)
   }, [])
 
+  // 组件挂载时自动获取截图
+  useEffect(() => {
+    workspaceStore.syncDevices().then(() => {
+      const currentDevices = [...workspaceStore.devices.values()]
+      currentDevices.forEach(device => {
+        if (device.isOnline) {
+          workspaceStore.captureScreenshot(device.id)
+        }
+      })
+    })
+  }, [])
+
   // Calculate clamped menu position to prevent viewport overflow
   const menuStyle = contextMenu ? {
     left: Math.min(contextMenu.x, window.innerWidth - 160),
@@ -58,8 +69,11 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
 
     if (interval > 0) {
       intervalRef.current = window.setInterval(() => {
-        // TODO: Trigger screenshot refresh for all online devices via IPC
-        console.log('Auto-refresh screenshots')
+        devices.forEach(device => {
+          if (device.isOnline) {
+            workspaceStore.captureScreenshot(device.id)
+          }
+        })
       }, interval)
     }
 
@@ -108,6 +122,7 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
               key={device.id}
               device={device}
               onRefresh={handleRefresh}
+              onPreview={onOpenPreview}
               onContextMenu={handleContextMenu}
             />
           ))}

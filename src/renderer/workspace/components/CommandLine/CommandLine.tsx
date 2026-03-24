@@ -11,6 +11,8 @@ import {
   colorTextDark,
   colorBgContainer,
   colorText,
+  colorTextSecondaryDark,
+  colorTextSecondary,
 } from 'common/theme'
 
 interface DeviceShell {
@@ -139,12 +141,15 @@ export default observer(function CommandLine() {
   const isDark = mainStore.settings.theme === 'dark'
   const terminalBg = isDark ? colorBgContainerDark : colorBgContainer
   const terminalFg = isDark ? colorTextDark : colorText
+  const sidebarBg = isDark ? colorBgContainerDark : colorBgContainer
+  const sidebarText = isDark ? colorTextDark : colorText
+  const sidebarTextSecondary = isDark ? colorTextSecondaryDark : colorTextSecondary
 
   return (
     <div className={Style.commandLine}>
       <div className={Style.contentArea}>
         <div className={Style.mainPanel}>
-          <div className={Style.mainHeader}>
+          <div className={Style.mainHeader} style={{ backgroundColor: terminalBg, color: sidebarText }}>
             {activeDevice ? (
               <>
                 <span className={className(Style.statusDot, activeDevice.online ? Style.online : Style.offline)} />
@@ -163,20 +168,20 @@ export default observer(function CommandLine() {
               activeOutput ? (
                 <pre className={Style.outputLine} style={{ color: terminalFg }}>{activeOutput}</pre>
               ) : (
-                <div className={Style.emptyTerminal}>
+                <div className={Style.emptyTerminal} style={{ color: sidebarTextSecondary }}>
                   终端输出将显示在这里
                 </div>
               )
             ) : (
               <div className={Style.emptyState}>
                 <div className={Style.emptyIcon}>+</div>
-                <div className={Style.emptyText}>从右侧列表选择一个设备</div>
+                <div className={Style.emptyText} style={{ color: sidebarTextSecondary }}>从右侧列表选择一个设备</div>
               </div>
             )}
           </div>
         </div>
 
-        <div className={Style.sidebar}>
+        <div className={Style.sidebar} style={{ backgroundColor: sidebarBg, color: sidebarText }}>
           <div className={Style.sidebarHeader}>
             <span>设备列表</span>
             <span className={Style.deviceCount}>{devices.length}</span>
@@ -200,7 +205,7 @@ export default observer(function CommandLine() {
         </div>
       </div>
 
-      <div className={Style.broadcastBar}>
+      <div className={Style.broadcastBar} style={{ backgroundColor: terminalBg, color: sidebarText }}>
         <div className={Style.deviceSelector}>
           <label className={Style.selectorItem}>
             <input

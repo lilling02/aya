@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction, toJS } from 'mobx'
-import { dataUrl } from 'licia/dataUrl'
+import dataUrl from 'licia/dataUrl'
 
 interface IpcGetDevices {
   id: string
