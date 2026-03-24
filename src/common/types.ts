@@ -179,3 +179,5 @@ export type IpcGetFileUrl = (
   port?: number
 ) => Promise<string>
 export type IpcGetDeviceCode = (deviceId: string) => Promise<string>
+export type IpcGetDeviceInfo = (deviceId: string) => Promise<string>
+export type IpcGetMiniRunVersion = (deviceId: string) => Promise<string>

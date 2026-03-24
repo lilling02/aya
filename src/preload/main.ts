@@ -49,6 +49,8 @@ import {
   IpcWipeAvdData,
   IpcWriteShell,
   IpcGetDeviceCode,
+  IpcGetDeviceInfo,
+  IpcGetMiniRunVersion,
   IpcStartScrcpyV2,
   IpcSelectScrcpyPath,
 } from 'common/types'
@@ -132,4 +134,6 @@ export default Object.assign(mainObj, {
   pairDevice: invoke<IpcPairDevice>('pairDevice'),
   getFileUrl: invoke<IpcGetFileUrl>('getFileUrl'),
   getDeviceCode: invoke<IpcGetDeviceCode>('getDeviceCode'),
+  getDeviceInfo: invoke<IpcGetDeviceInfo>('getDeviceInfo'),
+  getMiniRunVersion: invoke<IpcGetMiniRunVersion>('getMiniRunVersion'),
 })
