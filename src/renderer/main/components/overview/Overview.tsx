@@ -87,11 +87,6 @@ export default observer(function Overview() {
           {item(t('kernelVersion'), overview.kernelVersion, 'android')}
         </div>
         <div className={Style.row}>
-          {item(t('astVersion'), overview.astVersion, 'info')}
-          {item(t('deviceCode'), deviceCode, 'info')}
-          {item(t('miniRunVersion'), miniRunVersion, 'info')}
-        </div>
-        <div className={Style.row}>
           {item(
             t('processor'),
             `${overview.processor || t('unknown')} ${t('cpuNum', {
@@ -132,6 +127,11 @@ export default observer(function Overview() {
           {item('Wi-Fi', overview.wifi, 'wifi')}
           {item(t('ipAddress'), overview.ip, 'browser')}
           {item(t('macAddress'), overview.mac, 'browser')}
+        </div>
+        <div className={Style.row}>
+          {item(t('astVersion'), overview.astVersion, 'info')}
+          {item(t('deviceCode'), deviceCode, 'info')}
+          {item(t('miniRunVersion'), miniRunVersion, 'info')}
         </div>
         <div className={Style.deviceInfoContainer}>
           <div
