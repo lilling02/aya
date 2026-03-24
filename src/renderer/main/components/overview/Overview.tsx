@@ -139,7 +139,7 @@ export default observer(function Overview() {
             onClick={() => setDeviceInfoExpanded(!deviceInfoExpanded)}
           >
             <span className={`icon-info`}></span>
-            &nbsp;设备信息
+            &nbsp;{t('deviceInfo')}
             <span className={deviceInfoExpanded ? Style.arrowExpanded : Style.arrowCollapsed}>
               ▼
             </span>

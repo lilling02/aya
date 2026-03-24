@@ -195,5 +195,8 @@
   "preview": "预览",
   "deviceCode": "设备码",
   "copyDeviceCode": "复制设备码",
-  "copied": "已复制"
+  "copied": "已复制",
+  "astVersion": "AST 软件版本",
+  "miniRunVersion": "MiniRun 版本",
+  "deviceInfo": "设备信息"
 }
