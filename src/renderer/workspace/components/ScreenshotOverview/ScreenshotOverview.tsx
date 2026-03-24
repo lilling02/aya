@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { workspaceStore } from '../../store'
 import ScreenshotCard from '../ScreenshotCard/ScreenshotCard'
+import ScrcpyV2SettingsModal from '../../../main/components/toolbar/ScrcpyV2SettingsModal'
 import Style from './ScreenshotOverview.module.scss'
 import className from 'licia/className'
 
@@ -19,6 +20,8 @@ const REFRESH_OPTIONS = [
 export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
   const intervalRef = useRef<number | undefined>(undefined)
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; deviceId: string } | null>(null)
+  const [scrcpyV2ModalVisible, setScrcpyV2ModalVisible] = useState(false)
+  const [scrcpyV2DeviceId, setScrcpyV2DeviceId] = useState<string>('')
   const devices = [...workspaceStore.devices.values()]
   const onlineCount = devices.filter(d => d.isOnline).length
   const totalCount = devices.length
@@ -37,6 +40,27 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
     const value = Number(e.target.value)
     workspaceStore.refreshInterval = value
   }, [])
+
+  const handleScrcpyV2Click = useCallback((deviceId: string) => {
+    setScrcpyV2DeviceId(deviceId)
+    setScrcpyV2ModalVisible(true)
+    setContextMenu(null)
+  }, [])
+
+  const handleScrcpyV2Confirm = useCallback(async (settings: { maxSize: number; maxFps: number; videoCodec: string }) => {
+    // 保存设置到 screencastStore
+    const deviceSettings = await main.getScreencastStore('settings') || {}
+    deviceSettings[scrcpyV2DeviceId] = {
+      ...deviceSettings[scrcpyV2DeviceId],
+      ...settings,
+    }
+    await main.setScreencastStore('settings', deviceSettings)
+
+    // 启动投屏V2
+    if (main.startScrcpyV2) {
+      main.startScrcpyV2(scrcpyV2DeviceId)
+    }
+  }, [scrcpyV2DeviceId])
 
   // Close context menu on outside click
   useEffect(() => {
@@ -141,8 +165,26 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
 }}>
             打开设备预览
           </div>
+          <div className={Style.menuItem} onClick={() => {
+  main.startScrcpyV2(contextMenu.deviceId)
+  setContextMenu(null)
+}}>
+            用 Scrcpy V2 预览
+          </div>
+          <div className={Style.menuItem} onClick={() => {
+  handleScrcpyV2Click(contextMenu.deviceId)
+}}>
+            Scrcpy V2 设置
+          </div>
         </div>
       )}
+
+      <ScrcpyV2SettingsModal
+        visible={scrcpyV2ModalVisible}
+        deviceId={scrcpyV2DeviceId}
+        onClose={() => setScrcpyV2ModalVisible(false)}
+        onConfirm={handleScrcpyV2Confirm}
+      />
     </div>
   )
 })
