@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction, toJS } from 'mobx'
 import dataUrl from 'licia/dataUrl'
+import { generateDeviceColor } from 'common/deviceColor'
 
 interface IpcGetDevices {
   id: string
@@ -21,6 +22,7 @@ export interface IWorkspaceDevice {
   lastScreenshotTime?: number
   isOnline: boolean
   offlineTime?: number
+  color?: string
 }
 
 export interface ICommandHistory {
@@ -140,6 +142,10 @@ export default class WorkspaceStore {
   }
 
   updateDevice(device: IWorkspaceDevice) {
+    // 为在线设备设置颜色
+    if (device.isOnline && !device.color) {
+      device.color = generateDeviceColor(device.id)
+    }
     this.devices.set(device.id, device)
   }
 

@@ -18,7 +18,9 @@ export default observer(function DeviceList() {
           title={`${device.name} (${device.id})`}
         >
           <span className={Style.dot} />
-          <span className={Style.name}>{device.name}</span>
+          <span className={Style.name} style={device.color ? { color: device.color } : undefined}>
+            {device.name}
+          </span>
           <span className={Style.id}>({device.id})</span>
         </div>
       ))}

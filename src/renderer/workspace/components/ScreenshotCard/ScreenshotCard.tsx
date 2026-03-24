@@ -68,7 +68,9 @@ export default observer(function ScreenshotCard({ device, onRefresh, onPreview, 
       <div className={Style.cardFooter}>
         <div className={Style.deviceInfo}>
           <span className={`${Style.statusDot} ${device.isOnline ? Style.online : Style.offline}`} />
-          <span className={Style.deviceName}>{device.name}</span>
+          <span className={Style.deviceName} style={device.color ? { color: device.color } : undefined}>
+            {device.name}
+          </span>
           <span className={Style.androidVersion}>Android {device.androidVersion}</span>
         </div>
         <div className={Style.timestamp}>{timeDisplay}</div>

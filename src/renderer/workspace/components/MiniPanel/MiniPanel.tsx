@@ -34,7 +34,9 @@ export default observer(function MiniPanel({ device, output, selected, onClick, 
           onClick={e => e.stopPropagation()}
         />
         <span className={className(Style.statusDot, device.online ? Style.online : Style.offline)} />
-        <span className={Style.deviceName}>{device.name}</span>
+        <span className={Style.deviceName} style={device.color ? { color: device.color } : undefined}>
+          {device.name}
+        </span>
       </div>
       <div className={Style.miniOutput}>
         {last50Lines.map((line, index) => (

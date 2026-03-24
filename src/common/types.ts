@@ -5,6 +5,7 @@ export interface IDevice {
   androidVersion: string
   sdkVersion: string
   type: 'emulator' | 'device' | 'offline' | 'unauthorized' | 'unknown'
+  color?: string // 设备颜色（CSS 颜色值）
 }
 
 export interface IAvd {

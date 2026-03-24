@@ -12,6 +12,7 @@ import { installPackages, setMainStore } from '../../lib/util'
 import { setMemStore } from 'share/renderer/lib/util'
 import isEmpty from 'licia/isEmpty'
 import { IDevice } from 'common/types'
+import { generateDeviceColor } from 'common/deviceColor'
 
 class Store extends BaseStore {
   devices: IDevice[] = []
@@ -24,6 +25,8 @@ class Store extends BaseStore {
   file = new File()
   layout = new Layout()
   ready = false
+  // 设备颜色缓存（基于 ID 生成，无需持久化）
+  private deviceColors: Map<string, string> = new Map()
   constructor() {
     super()
 
@@ -56,6 +59,13 @@ class Store extends BaseStore {
     this.panel = panel
     setMainStore('panel', panel)
   }
+  // 获取设备颜色
+  getDeviceColor(deviceId: string): string {
+    if (!this.deviceColors.has(deviceId)) {
+      this.deviceColors.set(deviceId, generateDeviceColor(deviceId))
+    }
+    return this.deviceColors.get(deviceId)!
+  }
   private async init() {
     const panel = await main.getMainStore('panel')
     if (panel) {
@@ -78,8 +88,12 @@ class Store extends BaseStore {
   refreshDevices = async () => {
     const devices = await main.getDevices()
     runInAction(() => {
-      this.devices = devices
-      setMemStore('devices', devices)
+      // 为每个设备设置颜色
+      this.devices = devices.map((device) => ({
+        ...device,
+        color: device.type !== 'offline' ? this.getDeviceColor(device.id) : undefined,
+      }))
+      setMemStore('devices', this.devices)
     })
     if (!isEmpty(devices)) {
       if (!this.device) {
