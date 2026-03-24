@@ -59,7 +59,7 @@
   width: 100%;
   border-top: 1px solid var(--color-border);
   padding-top: #{$margin-m-d}px;
-  margin-top: #{$margin-s-d}px;
+  margin-top: #{$margin-s-m}px;
 }
 
 .deviceInfoHeader {
@@ -68,9 +68,6 @@
   align-items: center;
   margin-bottom: #{$margin-x-x-s}px;
   user-select: none;
-  &:hover .value {
-    color: var(--color-primary);
-  }
   [class^='icon-'],
   [class*=' icon-'] {
     &::before {
