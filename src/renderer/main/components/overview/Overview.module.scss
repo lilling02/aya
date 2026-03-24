@@ -54,3 +54,53 @@
 .title {
   margin-bottom: #{$margin-x-x-s}px;
 }
+
+.deviceInfoContainer {
+  width: 100%;
+  border-top: 1px solid var(--color-border);
+  padding-top: #{$margin-m-d}px;
+  margin-top: #{$margin-s-d}px;
+}
+
+.deviceInfoHeader {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: #{$margin-x-x-s}px;
+  user-select: none;
+  &:hover .value {
+    color: var(--color-primary);
+  }
+  [class^='icon-'],
+  [class*=' icon-'] {
+    &::before {
+      position: relative;
+      top: 2px;
+    }
+  }
+}
+
+.arrowCollapsed {
+  margin-left: auto;
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.arrowExpanded {
+  margin-left: auto;
+  font-size: 10px;
+  transform: rotate(180deg);
+  transition: transform 0.2s;
+}
+
+.deviceInfoContent {
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 12px;
+  background: var(--color-bg-container-darker);
+  padding: #{$padding-m-d}px;
+  border-radius: #{$border-radius-s-m}px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+  color: var(--color-text-secondary);
+}
