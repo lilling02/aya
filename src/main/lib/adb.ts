@@ -144,8 +144,8 @@ const getDeviceCode: IpcGetDeviceCode = async function (deviceId) {
 }
 
 const getDeviceInfo: IpcGetDeviceInfo = async function (deviceId) {
-  const VENDOR = `$(dumpsys activity broadcasts 2>/dev/null | grep -E 'android.intent.myservice.poweroff|com.innohi.action.SET_POWERONOFF|com.ys.systemui.poweroff|android.q_zheng.action.POWERONOFF' | head -1 | sed -e 's/.*android.intent.myservice.poweroff.*/xc/' -e 's/.*com.innohi.action.SET_POWERONOFF.*/ynh/' -e 's/.*com.innohi.action.SET_POWERONOFF.*/ys/' -e 's/.*android.q_zheng.action.POWERONOFF.*/sf/'); if [ -z "$VENDOR" ]; then VENDOR="unknown"; fi; ROM_SHOW_ID=$(getprop ro.build.display.id 2>/dev/null | tr -d '[:space:]'); CPU_MODEL=$(cat /proc/cpuinfo 2>/dev/null | grep -i "hardware" | cut -d: -f2 | sed 's/^[ \t]*//;s/[ \t]*$//'); RAM_SIZE=$(cat /proc/meminfo 2>/dev/null | grep -i "memtotal" | awk '{print $2}'); df /data 2>/dev/null | tail -1 | awk -v vendor="$VENDOR" -v cpu="$CPU_MODEL" -v rom="$ROM_SHOW_ID" -v ram="$RAM_SIZE" '{total_gb=$2/1024/1024; free_gb=$4/1024/1024; printf "设备信息:\\n主板厂家: %s\\ncpu: %s\\n固件版本号: %s\\n运存: %skB\\n总空间GB: %.2f, 可用空间GB: %.2f\\n", vendor, cpu, rom, ram, total_gb, free_gb}' || df / 2>/dev/null | tail -1 | awk -v vendor="$VENDOR" -v cpu="$CPU_MODEL" -v rom="$ROM_SHOW_ID" -v ram="$RAM_SIZE" '{total_gb=$2/1024/1024; free_gb=$4/1024/1024; printf "设备信息:\\n主板厂家: %s\\ncpu: %s\\n固件版本号: %s\\n运存: %skB\\n总空间GB: %.2f, 可用空间GB: %.2f\\n", vendor, cpu, rom, ram, total_gb, free_gb}'`
-
+  const VENDOR = `VENDOR=$(dumpsys activity broadcasts 2>/dev/null | grep -E 'android.intent.myservice.poweroff|com.innohi.action.SET_POWERONOFF|com.ys.systemui.poweroff|android.q_zheng.action.POWERONOFF' | head -1 | sed -e 's/.*android.intent.myservice.poweroff.*/xc/' -e 's/.*com.innohi.action.SET_POWERONOFF.*/ynh/' -e 's/.*com.innohi.action.SET_POWERONOFF.*/ys/' -e 's/.*android.q_zheng.action.POWERONOFF.*/sf/'); if [ -z "$VENDOR" ]; then VENDOR="unknown"; fi; ROM_SHOW_ID=$(getprop ro.build.display.id 2>/dev/null | tr -d '[:space:]'); CPU_MODEL=$(cat /proc/cpuinfo 2>/dev/null | grep -i "hardware" | cut -d: -f2 | sed 's/^[ \t]*//;s/[ \t]*$//'); RAM_SIZE=$(cat /proc/meminfo 2>/dev/null | grep -i "memtotal" | awk '{print $2}'); df /data 2>/dev/null | tail -1 | awk -v vendor="$VENDOR" -v cpu="$CPU_MODEL" -v rom="$ROM_SHOW_ID" -v ram="$RAM_SIZE" '{total_gb=$2/1024/1024; free_gb=$4/1024/1024; printf "设备信息:\\n主板厂家: %s\\ncpu: %s\\n固件版本号: %s\\n运存: %skB\\n总空间GB: %.2f, 可用空间GB: %.2f\\n", vendor, cpu, rom, ram, total_gb, free_gb}' || df / 2>/dev/null | tail -1 | awk -v vendor="$VENDOR" -v cpu="$CPU_MODEL" -v rom="$ROM_SHOW_ID" -v ram="$RAM_SIZE" '{total_gb=$2/1024/1024; free_gb=$4/1024/1024; printf "设备信息:\\n主板厂家: %s\\ncpu: %s\\n固件版本号: %s\\n运存: %skB\\n总空间GB: %.2f, 可用空间GB: %.2f\\n", vendor, cpu, rom, ram, total_gb, free_gb}'`
+  // const cmd = `VENDOR=$(dumpsys activity broadcasts 2>/dev/null | grep -E 'android.intent.myservice.poweroff|com.innohi.action.SET_POWERONOFF|com.ys.systemui.poweroff|android.q_zheng.action.POWERONOFF' | head -1 | sed -e 's/.*android.intent.myservice.poweroff.*/xc/' -e 's/.*com.innohi.action.SET_POWERONOFF.*/ynh/' -e 's/.*com.ys.systemui.poweroff.*/ys/' -e 's/.*android.q_zheng.action.POWERONOFF.*/sf/'); if [ -z "$VENDOR" ]; then VENDOR="unknown"; fi; ROM_SHOW_ID=$(getprop ro.build.display.id 2>/dev/null | tr -d '[:space:]'); CPU_MODEL=$(cat /proc/cpuinfo 2>/dev/null | grep -i "hardware" | cut -d: -f2 | sed 's/^[ \t]*//;s/[ \t]*$//'); RAM_SIZE=$(cat /proc/meminfo 2>/dev/null | grep -i "memtotal" | awk '{print $2}'); df /data 2>/dev/null | tail -1 | awk -v vendor="$VENDOR" -v cpu="$CPU_MODEL" -v rom="$ROM_SHOW_ID" -v ram="$RAM_SIZE" '{total_gb=$2/1024/1024; free_gb=$4/1024/1024; printf "设备信息:\n主板厂家: %s\ncpu: %s\n固件版本号: %s\n运存: %skB\n总空间GB: %.2f, 可用空间GB: %.2f\n", vendor, cpu, rom, ram, total_gb, free_gb}' || df / 2>/dev/null | tail -1 | awk -v vendor="$VENDOR" -v cpu="$CPU_MODEL" -v rom="$ROM_SHOW_ID" -v ram="$RAM_SIZE" '{total_gb=$2/1024/1024; free_gb=$4/1024/1024; printf "设备信息:\n主板厂家: %s\ncpu: %s\n固件版本号: %s\n运存: %skB\n总空间GB: %.2f, 可用空间GB: %.2f\n", vendor, cpu, rom, ram, total_gb, free_gb}'`
   try {
     const result = await shell(deviceId, VENDOR)
     return (result || '').trim()
@@ -159,11 +159,9 @@ const getMiniRunVersion: IpcGetMiniRunVersion = async function (deviceId) {
   try {
     const result = await shell(
       deviceId,
-      'su\ncat /data/data/com.lkm.ad_cross/plugins/miniRun/assets/dist/astConfig.json\necho'
+      'su 0 cat /data/data/com.lkm.ad_cross/plugins/miniRun/assets/dist/astConfig.json'
     )
-    const lines = (result as string).split('\n')
-    const jsonStr = lines[0]
-    const json = JSON.parse(jsonStr)
+    const json = JSON.parse(result as string)
     return json.version || ''
   } catch (e) {
     logger.error('getMiniRunVersion error', e)
