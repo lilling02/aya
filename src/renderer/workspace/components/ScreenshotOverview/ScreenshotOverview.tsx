@@ -48,6 +48,12 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
     workspaceStore.saveSettings()
   }, [])
 
+  const handleScrcpyV2 = useCallback((deviceId: string) => {
+    if (main.startScrcpyV2) {
+      main.startScrcpyV2(deviceId)
+    }
+  }, [])
+
   const handleScrcpyV2Click = useCallback((deviceId: string) => {
     setScrcpyV2DeviceId(deviceId)
     setScrcpyV2ModalVisible(true)
@@ -173,6 +179,7 @@ export default observer(function ScreenshotOverview({ onOpenPreview }: Props) {
               onRefresh={handleRefresh}
               onPreview={onOpenPreview}
               onContextMenu={handleContextMenu}
+              onScrcpyV2={handleScrcpyV2}
             />
           ))}
         </div>

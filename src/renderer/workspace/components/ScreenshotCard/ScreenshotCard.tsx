@@ -7,6 +7,7 @@ interface Props {
   onRefresh: (deviceId: string) => void
   onPreview: (deviceId: string) => void
   onContextMenu: (device: IWorkspaceDevice, e: React.MouseEvent) => void
+  onScrcpyV2: (deviceId: string) => void
 }
 
 function formatTimeSince(timestamp?: number): string {
@@ -20,7 +21,7 @@ function formatTimeSince(timestamp?: number): string {
   return `${hours}h 前`
 }
 
-export default observer(function ScreenshotCard({ device, onRefresh, onPreview, onContextMenu }: Props) {
+export default observer(function ScreenshotCard({ device, onRefresh, onPreview, onContextMenu, onScrcpyV2 }: Props) {
   const handleRefresh = (e: React.MouseEvent) => {
     e.stopPropagation()
     onRefresh(device.id)
@@ -35,6 +36,11 @@ export default observer(function ScreenshotCard({ device, onRefresh, onPreview, 
     onContextMenu(device, e)
   }
 
+  const handleScrcpyV2 = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onScrcpyV2(device.id)
+  }
+
   const timestamp = device.isOnline ? device.lastScreenshotTime : device.offlineTime
   const timeDisplay = formatTimeSince(timestamp)
 
@@ -43,7 +49,10 @@ export default observer(function ScreenshotCard({ device, onRefresh, onPreview, 
       className={`${Style.screenshotCard} ${!device.isOnline ? Style.offline : ''}`}
       onContextMenu={handleContextMenu}
     >
-      <button className={Style.refreshBtn} onClick={handleRefresh} title="刷新截图" />
+      <div className={Style.topButtons}>
+        <button className={Style.refreshBtn} onClick={handleRefresh} title="刷新截图" />
+        <button className={Style.scrcpyV2Btn} onClick={handleScrcpyV2} title="用 Scrcpy V2 预览" />
+      </div>
 
       <div
         className={Style.screenshotWrapper}
