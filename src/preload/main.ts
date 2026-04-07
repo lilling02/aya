@@ -53,6 +53,8 @@ import {
   IpcGetMiniRunVersion,
   IpcStartScrcpyV2,
   IpcSelectScrcpyPath,
+  IpcKillForward,
+  IpcKillReverse,
 } from 'common/types'
 import { IpcGetStore, IpcSetStore } from 'share/common/types'
 import mainObj from 'share/preload/main'
@@ -67,7 +69,7 @@ export default Object.assign(mainObj, {
   getDevicesStore: invoke<IpcGetStore>('getDevicesStore'),
   setDevicesStore: invoke<IpcSetStore>('setDevicesStore'),
   setScreencastAlwaysOnTop: invoke<IpcSetScreencastAlwaysOnTop>(
-    'setScreencastAlwaysOnTop'
+    'setScreencastAlwaysOnTop',
   ),
   getSettingsStore: invoke<IpcGetStore>('getSettingsStore'),
   setSettingsStore: invoke<IpcSetStore>('setSettingsStore'),
@@ -122,6 +124,8 @@ export default Object.assign(mainObj, {
   listReverses: invoke<IpcListReverses>('listReverses'),
   forward: invoke<IpcForward>('forward'),
   reverse: invoke<IpcReverse>('reverse'),
+  killForward: invoke<IpcKillForward>('killForward'),
+  killReverse: invoke<IpcKillReverse>('killReverse'),
   startWireless: invoke('startWireless'),
   openAdbCli: invoke('openAdbCli'),
   dumpWindowHierarchy: invoke<IpcDumpWindowHierarchy>('dumpWindowHierarchy'),

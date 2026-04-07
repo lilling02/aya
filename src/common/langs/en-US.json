@@ -86,6 +86,8 @@
   "macAddress": "MAC Address",
   "signature": "Signature",
   "confirm": "Confirm",
+  "ok": "OK",
+  "cancel": "Cancel",
   "back": "Back",
   "forward": "Forward",
   "up": "Up",

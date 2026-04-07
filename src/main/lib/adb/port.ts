@@ -4,6 +4,8 @@ import {
   IpcListForwards,
   IpcListReverses,
   IpcReverse,
+  IpcKillForward,
+  IpcKillReverse,
 } from 'common/types'
 import map from 'licia/map'
 import { handleEvent } from 'share/main/lib/util'
@@ -42,6 +44,16 @@ const reverse: IpcReverse = async function (deviceId, remote, local) {
   await device.reverse(remote, local)
 }
 
+const killForward: IpcKillForward = async function (deviceId, local) {
+  const device = await client.getDevice(deviceId)
+  await device.killForward(local)
+}
+
+const killReverse: IpcKillReverse = async function (deviceId, local) {
+  const device = await client.getDevice(deviceId)
+  await device.killReverse(local)
+}
+
 export function init(c: Client) {
   client = c
 
@@ -49,4 +61,6 @@ export function init(c: Client) {
   handleEvent('listReverses', listReverses)
   handleEvent('forward', forward)
   handleEvent('reverse', reverse)
+  handleEvent('killForward', killForward)
+  handleEvent('killReverse', killReverse)
 }
