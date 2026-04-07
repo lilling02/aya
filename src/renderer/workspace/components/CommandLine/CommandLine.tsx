@@ -23,8 +23,13 @@ export default observer(function CommandLine() {
   const [activeDeviceId, setActiveDeviceId] = useState<string | null>(null)
   const [command, setCommand] = useState('')
   const [showHistory, setShowHistory] = useState(false)
-  const [deviceOutputs, setDeviceOutputs] = useState<Map<string, string>>(new Map())
-  const [deviceShells, setDeviceShells] = useState<Map<string, DeviceShell>>(new Map())
+  const [versionInput, setVersionInput] = useState('')
+  const [deviceOutputs, setDeviceOutputs] = useState<Map<string, string>>(
+    new Map(),
+  )
+  const [deviceShells, setDeviceShells] = useState<Map<string, DeviceShell>>(
+    new Map(),
+  )
   const activeSessions = useRef<Set<string>>(new Set())
   const outputRef = useRef<HTMLDivElement>(null)
   const deviceShellsRef = useRef(deviceShells)
@@ -32,8 +37,12 @@ export default observer(function CommandLine() {
   const devices = Array.from(workspaceStore.devices.values())
   const selectedCount = workspaceStore.selectedDeviceIds.size
 
-  const activeDevice = activeDeviceId ? workspaceStore.devices.get(activeDeviceId) : null
-  const activeOutput = activeDeviceId ? deviceOutputs.get(activeDeviceId) || '' : ''
+  const activeDevice = activeDeviceId
+    ? workspaceStore.devices.get(activeDeviceId)
+    : null
+  const activeOutput = activeDeviceId
+    ? deviceOutputs.get(activeDeviceId) || ''
+    : ''
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -46,7 +55,7 @@ export default observer(function CommandLine() {
       // Find which device this session belongs to using ref
       for (const [deviceId, shell] of deviceShellsRef.current) {
         if (shell.sessionId === sessionId) {
-          setDeviceOutputs(prev => {
+          setDeviceOutputs((prev) => {
             const newMap = new Map(prev)
             const existing = newMap.get(deviceId) || ''
             newMap.set(deviceId, existing + data)
@@ -57,7 +66,9 @@ export default observer(function CommandLine() {
       }
     }
     const offShellData = main.on('shellData', onShellData)
-    return offShellData
+    return () => {
+      offShellData()
+    }
   }, [])
 
   useEffect(() => {
@@ -73,7 +84,7 @@ export default observer(function CommandLine() {
     try {
       const sessionId = await main.createShell(deviceId)
       activeSessions.current.add(sessionId)
-      setDeviceShells(prev => new Map(prev).set(deviceId, { sessionId }))
+      setDeviceShells((prev) => new Map(prev).set(deviceId, { sessionId }))
       return sessionId
     } catch (err) {
       console.error(`Failed to create shell for device ${deviceId}:`, err)
@@ -112,7 +123,7 @@ export default observer(function CommandLine() {
     }
   }
 
-  const handleCommandSubmit = async (e: React.FormEvent) => {
+  const handleCommandSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault()
     if (!command.trim() || selectedCount === 0) return
 
@@ -138,21 +149,50 @@ export default observer(function CommandLine() {
     setShowHistory(false)
   }
 
+  // 根据版本号补全完整命令
+  const completedCommand = versionInput.trim()
+    ? `adb shell am broadcast -a com.lkm.app_ados.ConfigReceiver -n com.lkm.ad_cross/com.lkm.app_ados.ConfigReceiver --es cmd installmini --es url "http://f.satrace.cn/upload/ados/dist/${versionInput.trim()}.zip" --es force "force"`
+    : ''
+
+  const handleCopyCommand = () => {
+    if (completedCommand) {
+      navigator.clipboard.writeText(completedCommand).then(() => {
+        // 可选：提示复制成功
+      })
+    }
+  }
+
+  const handleFillCommand = () => {
+    if (completedCommand) {
+      setCommand(completedCommand)
+    }
+  }
+
   const isDark = mainStore.settings.theme === 'dark'
   const terminalBg = isDark ? colorBgContainerDark : colorBgContainer
   const terminalFg = isDark ? colorTextDark : colorText
   const sidebarBg = isDark ? colorBgContainerDark : colorBgContainer
   const sidebarText = isDark ? colorTextDark : colorText
-  const sidebarTextSecondary = isDark ? colorTextSecondaryDark : colorTextSecondary
+  const sidebarTextSecondary = isDark
+    ? colorTextSecondaryDark
+    : colorTextSecondary
 
   return (
     <div className={Style.commandLine}>
       <div className={Style.contentArea}>
         <div className={Style.mainPanel}>
-          <div className={Style.mainHeader} style={{ backgroundColor: terminalBg, color: sidebarText }}>
+          <div
+            className={Style.mainHeader}
+            style={{ backgroundColor: terminalBg, color: sidebarText }}
+          >
             {activeDevice ? (
               <>
-                <span className={className(Style.statusDot, activeDevice.online ? Style.online : Style.offline)} />
+                <span
+                  className={className(
+                    Style.statusDot,
+                    activeDevice.isOnline ? Style.online : Style.offline,
+                  )}
+                />
                 <span className={Style.deviceName}>{activeDevice.name}</span>
               </>
             ) : (
@@ -166,22 +206,35 @@ export default observer(function CommandLine() {
           >
             {activeDevice ? (
               activeOutput ? (
-                <pre className={Style.outputLine} style={{ color: terminalFg }}>{activeOutput}</pre>
+                <pre className={Style.outputLine} style={{ color: terminalFg }}>
+                  {activeOutput}
+                </pre>
               ) : (
-                <div className={Style.emptyTerminal} style={{ color: sidebarTextSecondary }}>
+                <div
+                  className={Style.emptyTerminal}
+                  style={{ color: sidebarTextSecondary }}
+                >
                   终端输出将显示在这里
                 </div>
               )
             ) : (
               <div className={Style.emptyState}>
                 <div className={Style.emptyIcon}>+</div>
-                <div className={Style.emptyText} style={{ color: sidebarTextSecondary }}>从右侧列表选择一个设备</div>
+                <div
+                  className={Style.emptyText}
+                  style={{ color: sidebarTextSecondary }}
+                >
+                  从右侧列表选择一个设备
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        <div className={Style.sidebar} style={{ backgroundColor: sidebarBg, color: sidebarText }}>
+        <div
+          className={Style.sidebar}
+          style={{ backgroundColor: sidebarBg, color: sidebarText }}
+        >
           <div className={Style.sidebarHeader}>
             <div className={Style.headerLeft}>
               <span>设备列表</span>
@@ -191,8 +244,12 @@ export default observer(function CommandLine() {
               <label className={Style.selectorItem}>
                 <input
                   type="checkbox"
-                  checked={selectedCount === devices.length && devices.length > 0}
-                  onChange={e => e.target.checked ? handleSelectAll() : handleDeselectAll()}
+                  checked={
+                    selectedCount === devices.length && devices.length > 0
+                  }
+                  onChange={(e) =>
+                    e.target.checked ? handleSelectAll() : handleDeselectAll()
+                  }
                 />
                 <span>全选</span>
               </label>
@@ -208,7 +265,7 @@ export default observer(function CommandLine() {
           </div>
           <div className={Style.deviceList}>
             {devices.length > 0 ? (
-              devices.map(device => (
+              devices.map((device) => (
                 <MiniPanel
                   key={device.id}
                   device={device}
@@ -219,17 +276,20 @@ export default observer(function CommandLine() {
                 />
               ))
             ) : (
-              <div className={Style.emptyDeviceList}>
-                暂无设备
-              </div>
+              <div className={Style.emptyDeviceList}>暂无设备</div>
             )}
           </div>
         </div>
       </div>
 
-      <div className={Style.broadcastBar} style={{ backgroundColor: terminalBg, color: sidebarText }}>
+      <div
+        className={Style.broadcastBar}
+        style={{ backgroundColor: terminalBg, color: sidebarText }}
+      >
         <div className={Style.deviceSelector}>
-          <span className={Style.selectedInfo}>已选 {selectedCount} 个设备</span>
+          <span className={Style.selectedInfo}>
+            已选 {selectedCount} 个设备
+          </span>
         </div>
 
         <form className={Style.commandForm} onSubmit={handleCommandSubmit}>
@@ -237,7 +297,7 @@ export default observer(function CommandLine() {
             type="text"
             className={Style.commandInput}
             value={command}
-            onChange={e => setCommand(e.target.value)}
+            onChange={(e) => setCommand(e.target.value)}
             placeholder="输入命令..."
           />
           <button
@@ -256,6 +316,42 @@ export default observer(function CommandLine() {
             广播 ({selectedCount})
           </button>
         </form>
+
+        {/* 版本号补全区域 */}
+        <div className={Style.versionSection}>
+          <div className={Style.versionInputRow}>
+            <input
+              type="text"
+              className={Style.versionInput}
+              value={versionInput}
+              onChange={(e) => setVersionInput(e.target.value)}
+              placeholder="输入版本号，如 wl-touch_2024120302"
+            />
+          </div>
+          {completedCommand && (
+            <div className={Style.versionResult}>
+              <div className={Style.versionCommand}>{completedCommand}</div>
+              <div className={Style.versionActions}>
+                <button
+                  type="button"
+                  className={Style.copyBtn}
+                  onClick={handleCopyCommand}
+                  title="复制命令"
+                >
+                  复制
+                </button>
+                <button
+                  type="button"
+                  className={Style.fillBtn}
+                  onClick={handleFillCommand}
+                  title="填充到命令输入框"
+                >
+                  填充
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {showHistory && (
