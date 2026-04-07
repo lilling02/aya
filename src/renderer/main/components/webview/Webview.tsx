@@ -17,6 +17,7 @@ import ToolbarIcon from 'share/renderer/components/ToolbarIcon'
 import DataGrid from 'luna-data-grid'
 import { useWindowResize } from 'share/renderer/lib/hooks'
 import { IWebview } from 'common/types'
+import PortMappingModal from '../overview/PortMappingModal'
 
 export default observer(function Webview() {
   const [webviews, setWebviews] = useState<IWebview[]>([])
@@ -28,6 +29,7 @@ export default observer(function Webview() {
   })
   const dataGridRef = useRef<DataGrid>(null)
   const [filter, setFilter] = useState('')
+  const [portModalVisible, setPortModalVisible] = useState(false)
 
   const { device } = store
 
@@ -54,7 +56,7 @@ export default observer(function Webview() {
                 map(webviews, (webview: any) => {
                   const title = webview.faviconUrl
                     ? toEl(
-                        `<span><img src="${webview.faviconUrl}" />${webview.title}</span>`
+                        `<span><img src="${webview.faviconUrl}" />${webview.title}</span>`,
                       )
                     : webview.title
 
@@ -62,7 +64,7 @@ export default observer(function Webview() {
                     ...webview,
                     title,
                   }
-                })
+                }),
               )
             }
           } catch {
@@ -113,7 +115,7 @@ export default observer(function Webview() {
               url = 'devtools://devtools/bundled/inspector.html'
               url += `?ws=${selected!.webSocketDebuggerUrl.replace(
                 'ws://',
-                ''
+                '',
               )}`
             }
             main.openWindow(url, 'devtools')
@@ -125,6 +127,12 @@ export default observer(function Webview() {
           icon="browser"
           title={t('openWithBrowser')}
           onClick={() => main.openExternal(selected!.url)}
+        />
+        <ToolbarIcon
+          disabled={!device}
+          icon="bidirection"
+          title={t('portMapping')}
+          onClick={() => setPortModalVisible(true)}
         />
       </LunaToolbar>
       <LunaDataGrid
@@ -140,6 +148,10 @@ export default observer(function Webview() {
           dataGridRef.current = dataGrid
           dataGrid.fit()
         }}
+      />
+      <PortMappingModal
+        visible={portModalVisible}
+        onClose={() => setPortModalVisible(false)}
       />
     </div>
   )
