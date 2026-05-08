@@ -6,6 +6,7 @@ import MiniPanel from '../MiniPanel/MiniPanel'
 import CommandHistoryModal from '../CommandHistoryModal/CommandHistoryModal'
 import Style from './CommandLine.module.scss'
 import className from 'licia/className'
+import { notify } from 'share/renderer/lib/util'
 import {
   colorBgContainerDark,
   colorTextDark,
@@ -24,6 +25,7 @@ export default observer(function CommandLine() {
   const [command, setCommand] = useState('')
   const [showHistory, setShowHistory] = useState(false)
   const [versionInput, setVersionInput] = useState('')
+  const [pullPath, setPullPath] = useState('/sdcard/ast-os/files/databases/mytime.db')
   const [deviceOutputs, setDeviceOutputs] = useState<Map<string, string>>(
     new Map(),
   )
@@ -168,6 +170,27 @@ export default observer(function CommandLine() {
     }
   }
 
+  const handlePullFile = async () => {
+    if (!activeDevice || !pullPath.trim()) return
+
+    const defaultPath = pullPath.split('/').pop() || 'file.db'
+    const { canceled, filePath } = await main.showSaveDialog({
+      defaultPath: defaultPath,
+    })
+    
+    if (canceled || !filePath) {
+      return
+    }
+
+    try {
+      await main.pullFile(activeDevice.id, pullPath.trim(), filePath)
+      notify(`文件提取成功: ${filePath}`, { icon: 'success' })
+    } catch (err: any) {
+      console.error('提取文件失败:', err)
+      notify(`提取失败: ${err.message || err}`, { icon: 'error' })
+    }
+  }
+
   const isDark = mainStore.settings.theme === 'dark'
   const terminalBg = isDark ? colorBgContainerDark : colorBgContainer
   const terminalFg = isDark ? colorTextDark : colorText
@@ -193,7 +216,7 @@ export default observer(function CommandLine() {
                     activeDevice.isOnline ? Style.online : Style.offline,
                   )}
                 />
-                <span className={Style.deviceName}>{activeDevice.name}</span>
+                <span className={Style.deviceName}>{activeDevice.id} {activeDevice.name ? `(${activeDevice.name})` : ''}</span>
               </>
             ) : (
               <span className={Style.noDevice}>未选择设备</span>
@@ -351,6 +374,28 @@ export default observer(function CommandLine() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* 文件拉取区域 */}
+        <div className={Style.pullFileSection}>
+          <div className={Style.versionInputRow}>
+            <input
+              type="text"
+              className={Style.versionInput}
+              value={pullPath}
+              onChange={(e) => setPullPath(e.target.value)}
+              placeholder="输入设备文件路径，如 /sdcard/ast-os/files/databases/mytime.db"
+            />
+            <button
+              type="button"
+              className={Style.pullBtn}
+              onClick={handlePullFile}
+              disabled={!activeDevice || !pullPath.trim()}
+              title="将输入的文件路径从当前选中的设备中拉取到本地"
+            >
+              提取文件
+            </button>
+          </div>
         </div>
       </div>
 

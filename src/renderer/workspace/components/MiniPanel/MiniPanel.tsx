@@ -33,9 +33,9 @@ export default observer(function MiniPanel({ device, output, selected, onClick, 
           onChange={handleCheckboxChange}
           onClick={e => e.stopPropagation()}
         />
-        <span className={className(Style.statusDot, device.online ? Style.online : Style.offline)} />
+        <span className={className(Style.statusDot, device.isOnline ? Style.online : Style.offline)} />
         <span className={Style.deviceName} style={device.color ? { color: device.color } : undefined}>
-          {device.name}
+          {device.id} {device.name ? `(${device.name})` : ''}
         </span>
       </div>
       <div className={Style.miniOutput}>
