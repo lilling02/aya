@@ -72,9 +72,6 @@ function renderApp() {
     case 'video':
       App = lazy(() => import('share/renderer/video/App.js') as Promise<any>)
       break
-    case 'workspace':
-      App = lazy(() => import('./workspace/pages/Workspace.js') as Promise<any>)
-      break
   }
 
   preload.setTitle(title)

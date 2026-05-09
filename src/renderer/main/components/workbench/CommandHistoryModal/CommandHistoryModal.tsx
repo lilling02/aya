@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { observer } from 'mobx-react-lite'
-import { workspaceStore, ICommandHistory } from '../../store'
+import { workspaceStore, ICommandHistory } from '../../../store/workspace'
 import Style from './CommandHistoryModal.module.scss'
 import className from 'licia/className'
 

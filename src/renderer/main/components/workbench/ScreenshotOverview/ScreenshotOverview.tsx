@@ -1,8 +1,8 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { observer } from 'mobx-react-lite'
-import { workspaceStore } from '../../store'
+import { workspaceStore } from '../../../store/workspace'
 import ScreenshotCard from '../ScreenshotCard/ScreenshotCard'
-import ScrcpyV2SettingsModal from '../../../main/components/toolbar/ScrcpyV2SettingsModal'
+import ScrcpyV2SettingsModal from '../../toolbar/ScrcpyV2SettingsModal'
 import Style from './ScreenshotOverview.module.scss'
 import className from 'licia/className'
 

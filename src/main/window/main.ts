@@ -1,4 +1,7 @@
-import { app, BrowserWindow, session } from 'electron'
+import { app, BrowserWindow, session, shell } from 'electron'
+import path from 'path'
+import fs from 'fs'
+import { getUserDataPath } from 'share/main/lib/util'
 import { getMainStore } from '../lib/store'
 import { getOpenFileFromArgv, handleEvent } from 'share/main/lib/util'
 import * as window from 'share/main/lib/window'
@@ -59,6 +62,15 @@ const init = once(() => {
       callback({ requestHeaders: details.requestHeaders })
     }
   )
+
+  session.defaultSession.on('will-download', (event, item) => {
+    const downloadDir = getUserDataPath('downloads')
+    if (!fs.existsSync(downloadDir)) {
+      fs.mkdirSync(downloadDir, { recursive: true })
+    }
+    const savePath = path.join(downloadDir, item.getFilename())
+    item.setSavePath(savePath)
+  })
 })
 
 const initIpc = once(() => {
@@ -76,6 +88,20 @@ const initIpc = once(() => {
     screencast.showWin()
   })
   handleEvent('showDevices', () => devices.showWin())
+  handleEvent('openDownloadsFolder', () => {
+    const downloadDir = getUserDataPath('downloads')
+    if (!fs.existsSync(downloadDir)) {
+      fs.mkdirSync(downloadDir, { recursive: true })
+    }
+    shell.openPath(downloadDir)
+  })
+  handleEvent('getDownloadsPath', () => {
+    const downloadDir = getUserDataPath('downloads')
+    if (!fs.existsSync(downloadDir)) {
+      fs.mkdirSync(downloadDir, { recursive: true })
+    }
+    return downloadDir
+  })
   if (isMac) {
     app.on('open-file', (_, path) => {
       if (!endWith(path, '.apk')) {

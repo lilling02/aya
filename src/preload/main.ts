@@ -140,4 +140,6 @@ export default Object.assign(mainObj, {
   getDeviceCode: invoke<IpcGetDeviceCode>('getDeviceCode'),
   getDeviceInfo: invoke<IpcGetDeviceInfo>('getDeviceInfo'),
   getMiniRunVersion: invoke<IpcGetMiniRunVersion>('getMiniRunVersion'),
+  openDownloadsFolder: invoke('openDownloadsFolder'),
+  getDownloadsPath: invoke('getDownloadsPath'),
 })

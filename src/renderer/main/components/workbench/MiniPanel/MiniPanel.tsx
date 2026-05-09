@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite'
-import { IWorkspaceDevice } from '../../store'
+import { IWorkspaceDevice } from '../../../store/workspace'
 import Style from './MiniPanel.module.scss'
 import className from 'licia/className'
 

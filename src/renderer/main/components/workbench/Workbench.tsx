@@ -1,11 +1,11 @@
 import { useState, useCallback } from 'react'
 import { observer } from 'mobx-react-lite'
-import ScreenshotOverview from '../../../workspace/components/ScreenshotOverview/ScreenshotOverview'
-import CommandLine from '../../../workspace/components/CommandLine/CommandLine'
+import ScreenshotOverview from './ScreenshotOverview/ScreenshotOverview'
+import CommandLine from './CommandLine/CommandLine'
 import Style from './Workbench.module.scss'
 import className from 'licia/className'
 import { t } from 'common/util'
-import { workspaceStore } from '../../../workspace/store'
+import { workspaceStore } from '../../store/workspace'
 
 type WorkbenchMode = 'screenshot' | 'cmd'
 
