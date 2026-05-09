@@ -2,12 +2,13 @@ import { useState, useCallback } from 'react'
 import { observer } from 'mobx-react-lite'
 import ScreenshotOverview from './ScreenshotOverview/ScreenshotOverview'
 import CommandLine from './CommandLine/CommandLine'
+import FileExtraction from './FileExtraction/FileExtraction'
 import Style from './Workbench.module.scss'
 import className from 'licia/className'
 import { t } from 'common/util'
 import { workspaceStore } from '../../store/workspace'
 
-type WorkbenchMode = 'screenshot' | 'cmd'
+type WorkbenchMode = 'screenshot' | 'cmd' | 'fileExtraction'
 
 export default observer(function Workbench() {
   const [mode, setMode] = useState<WorkbenchMode>('screenshot')
@@ -45,6 +46,12 @@ export default observer(function Workbench() {
           >
             {t('commandLine')}
           </button>
+          <button
+            className={className(Style.tab, mode === 'fileExtraction' ? Style.active : '')}
+            onClick={() => setMode('fileExtraction')}
+          >
+            {t('fileExtraction')}
+          </button>
         </div>
         <button
           className={Style.refreshBtn}
@@ -54,11 +61,11 @@ export default observer(function Workbench() {
         </button>
       </div>
       <div className={Style.content}>
-        {mode === 'screenshot' ? (
+        {mode === 'screenshot' && (
           <ScreenshotOverview onOpenPreview={handleOpenPreview} />
-        ) : (
-          <CommandLine />
         )}
+        {mode === 'cmd' && <CommandLine />}
+        {mode === 'fileExtraction' && <FileExtraction />}
       </div>
 
       {/* 截图预览弹窗 */}

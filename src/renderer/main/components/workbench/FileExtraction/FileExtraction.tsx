@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import LunaModal from 'luna-modal'
+import { t } from 'common/util'
 import { workspaceStore } from '../../../store/workspace'
 import mainStore from '../../../store'
 import MiniPanel from '../MiniPanel/MiniPanel'
@@ -28,8 +30,8 @@ export default observer(function FileExtraction() {
     setActiveDeviceId(deviceId)
   }
 
-  const handleAddFavorite = () => {
-    const name = window.prompt('请输入路径名称', '常用数据库')
+  const handleAddFavorite = async () => {
+    const name = await LunaModal.prompt(t('enterPathName'), t('commonDatabase'))
     if (name && pullPath.trim()) {
       const newFavorites = [...mainStore.settings.commonFilePaths, { name, path: pullPath.trim() }]
       mainStore.settings.set('commonFilePaths', newFavorites)
@@ -89,23 +91,23 @@ export default observer(function FileExtraction() {
                 <span className={Style.deviceName}>{activeDevice.id} {activeDevice.name ? `(${activeDevice.name})` : ''}</span>
               </>
             ) : (
-              <span className={Style.noDevice}>未选择设备</span>
+              <span className={Style.noDevice}>{t('noDeviceSelected')}</span>
             )}
           </div>
           
           <div className={Style.toolArea} style={{ backgroundColor: terminalBg }}>
             <div className={Style.pullFileSection}>
-              <div className={Style.sectionTitle} style={{ color: sidebarText }}>提取文件</div>
+              <div className={Style.sectionTitle} style={{ color: sidebarText }}>{t('fileExtraction')}</div>
               <div className={Style.sectionDesc} style={{ color: sidebarTextSecondary }}>
-                将输入的文件路径从当前选中的设备中拉取到本地
+                {t('fileExtractionDesc')}
               </div>
               
               {/* 常用路径区域 */}
               <div className={Style.favoritesSection}>
                 <div className={Style.favoritesHeader}>
-                  <span className={Style.favoritesTitle} style={{ color: sidebarTextSecondary }}>常用路径</span>
-                  <button className={Style.addFavoriteBtn} onClick={handleAddFavorite} title="将当前路径加入常用">
-                    + 保存当前路径
+                  <span className={Style.favoritesTitle} style={{ color: sidebarTextSecondary }}>{t('commonPath')}</span>
+                  <button className={Style.addFavoriteBtn} onClick={handleAddFavorite} title={t('addPathToCommon')}>
+                    + {t('saveCurrentPath')}
                   </button>
                 </div>
                 <div className={Style.favoritesList}>
@@ -119,7 +121,7 @@ export default observer(function FileExtraction() {
                     </div>
                   ))}
                   {mainStore.settings.commonFilePaths.length === 0 && (
-                    <span className={Style.emptyFavorites} style={{ color: sidebarTextSecondary }}>暂无常用路径，点击上方按钮添加</span>
+                    <span className={Style.emptyFavorites} style={{ color: sidebarTextSecondary }}>{t('noCommonPaths')}</span>
                   )}
                 </div>
               </div>
@@ -130,7 +132,7 @@ export default observer(function FileExtraction() {
                   className={Style.pathInput}
                   value={pullPath}
                   onChange={(e) => setPullPath(e.target.value)}
-                  placeholder="输入设备文件路径，如 /sdcard/ast-os/files/databases/mytime.db"
+                  placeholder={t('enterPathPlaceholder')}
                 />
                 <button
                   type="button"
@@ -138,7 +140,14 @@ export default observer(function FileExtraction() {
                   onClick={handlePullFile}
                   disabled={!activeDevice || !pullPath.trim()}
                 >
-                  开始提取
+                  {t('startExtraction')}
+                </button>
+                <button
+                  type="button"
+                  className={Style.openDirBtn}
+                  onClick={() => main.openDownloadsFolder()}
+                >
+                  {t('openDownloadDir')}
                 </button>
               </div>
             </div>
@@ -151,7 +160,7 @@ export default observer(function FileExtraction() {
         >
           <div className={Style.sidebarHeader}>
             <div className={Style.headerLeft}>
-              <span>设备列表</span>
+              <span>{t('deviceList')}</span>
               <span className={Style.deviceCount}>{devices.length}</span>
             </div>
           </div>
@@ -168,7 +177,7 @@ export default observer(function FileExtraction() {
                 />
               ))
             ) : (
-              <div className={Style.emptyDeviceList}>暂无设备</div>
+              <div className={Style.emptyDeviceList}>{t('noDevices')}</div>
             )}
           </div>
         </div>
