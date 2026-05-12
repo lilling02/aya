@@ -7,6 +7,7 @@ export class Settings {
   adbPath = ''
   killAdbWhenExit = false
   useNativeTitlebar = false
+  autoAddDbSuffix = false
   commonFilePaths: { name: string; path: string }[] = []
   constructor() {
     makeObservable(this, {
@@ -15,6 +16,7 @@ export class Settings {
       adbPath: observable,
       killAdbWhenExit: observable,
       useNativeTitlebar: observable,
+      autoAddDbSuffix: observable,
       commonFilePaths: observable,
       set: action,
     })
@@ -28,6 +30,7 @@ export class Settings {
       'adbPath',
       'killAdbWhenExit',
       'useNativeTitlebar',
+      'autoAddDbSuffix',
       'commonFilePaths',
     ]
     for (let i = 0, len = names.length; i < len; i++) {
