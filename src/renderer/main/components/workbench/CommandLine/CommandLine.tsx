@@ -169,6 +169,19 @@ export default observer(function CommandLine() {
     }
   }
 
+  const handleVersionInputChange = (value: string) => {
+    let cleanValue = value
+    const trimmed = value.trim()
+    if (/^https?:\/\//i.test(trimmed) && trimmed.toLowerCase().endsWith('.zip')) {
+      const parts = trimmed.split('/')
+      cleanValue = parts[parts.length - 1] || ''
+    }
+    if (cleanValue.trim().toLowerCase().endsWith('.zip')) {
+      cleanValue = cleanValue.trim().slice(0, -4)
+    }
+    setVersionInput(cleanValue)
+  }
+
 
   const isDark = mainStore.settings.theme === 'dark'
   const terminalBg = isDark ? colorBgContainerDark : colorBgContainer
@@ -326,7 +339,7 @@ export default observer(function CommandLine() {
               type="text"
               className={Style.versionInput}
               value={versionInput}
-              onChange={(e) => setVersionInput(e.target.value)}
+              onChange={(e) => handleVersionInputChange(e.target.value)}
               placeholder="输入版本号，如 wl-touch_2024120302"
             />
           </div>
