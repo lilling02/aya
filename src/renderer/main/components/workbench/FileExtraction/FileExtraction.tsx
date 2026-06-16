@@ -53,6 +53,17 @@ export default observer(function FileExtraction() {
         { name: t('lycControllerDb'), path: '/sdcard/ast-os/files/databases/my.controller' },
         { name: t('lycOrderImageDb'), path: '/sdcard/ast-os/files/databases/my.orderImage' },
       ]
+    },
+    {
+      title: t('lygDatabase'),
+      items: [
+        { name: t('lygKeyValueDb'), path: '/sdcard/ast-os/files/databases/sflyg' },
+        { name: t('lygOrderDb'), path: '/sdcard/ast-os/files/databases/sf_lyg_order_history.db' },
+        { name: t('lygDestroyDb'), path: '/sdcard/ast-os/files/databases/destroy_samples_records.db' },
+        { name: t('lygAlarmDb'), path: '/sdcard/ast-os/files/databases/alarm_records.db' },
+        { name: t('lygVerifyPushDb'), path: '/sdcard/ast-os/files/databases/verify_push_records.db' },
+        { name: t('lygUnlockLogDb'), path: '/sdcard/ast-os/files/databases/unlock_log' },
+      ]
     }
   ]
 
