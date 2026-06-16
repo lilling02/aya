@@ -21,8 +21,16 @@ interface DeviceShell {
 }
 
 export default observer(function CommandLine() {
-  const [activeDeviceId, setActiveDeviceId] = useState<string | null>(null)
+  const [activeDeviceId, setActiveDeviceId] = useState<string | null>(mainStore.device?.id || null)
   const [command, setCommand] = useState('')
+  // ... rest of state ...
+
+  // 自动同步主界面的设备选择到当前活动设备
+  useEffect(() => {
+    if (!activeDeviceId && mainStore.device) {
+      setActiveDeviceId(mainStore.device.id)
+    }
+  }, [mainStore.device])
   const [showHistory, setShowHistory] = useState(false)
   const [versionInput, setVersionInput] = useState('')
   const [deviceOutputs, setDeviceOutputs] = useState<Map<string, string>>(

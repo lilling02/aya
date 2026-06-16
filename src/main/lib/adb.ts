@@ -44,6 +44,7 @@ import {
   IpcGetDeviceCode,
   IpcGetDeviceInfo,
   IpcGetMiniRunVersion,
+  IpcSetDeviceCode,
 } from 'common/types'
 import path from 'node:path'
 import childProcess from 'node:child_process'
@@ -166,6 +167,15 @@ const getMiniRunVersion: IpcGetMiniRunVersion = async function (deviceId) {
   } catch (e) {
     logger.error('getMiniRunVersion error', e)
     return ''
+  }
+}
+
+const setDeviceCode: IpcSetDeviceCode = async function (deviceId, code) {
+  try {
+    await shell(deviceId, `echo ${code} > /sdcard/ast-shard/uncode`)
+  } catch (e) {
+    logger.error('setDeviceCode error', e)
+    throw e
   }
 }
 
@@ -489,6 +499,7 @@ export async function init() {
   handleEvent('restartAdbServer', restartAdbServer)
   handleEvent('pairDevice', pairDevice)
   handleEvent('getDeviceCode', getDeviceCode)
+  handleEvent('setDeviceCode', setDeviceCode)
   handleEvent('getDeviceInfo', getDeviceInfo)
   handleEvent('getMiniRunVersion', getMiniRunVersion)
 }

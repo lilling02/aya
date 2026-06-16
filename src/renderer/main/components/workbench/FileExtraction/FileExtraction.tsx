@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import LunaModal from 'luna-modal'
 import { t } from 'common/util'
@@ -18,9 +18,16 @@ import {
 } from 'common/theme'
 
 export default observer(function FileExtraction() {
-  const [activeDeviceId, setActiveDeviceId] = useState<string | null>(null)
+  const [activeDeviceId, setActiveDeviceId] = useState<string | null>(mainStore.device?.id || null)
   const [pullPath, setPullPath] = useState('/sdcard/ast-os/files/databases/morning_inspection')
   const [filePrefix, setFilePrefix] = useState('')
+
+  // 自动同步主界面的设备选择到当前活动设备
+  useEffect(() => {
+    if (!activeDeviceId && mainStore.device) {
+      setActiveDeviceId(mainStore.device.id)
+    }
+  }, [mainStore.device])
 
   const categories = [
     {

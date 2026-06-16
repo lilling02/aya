@@ -138,6 +138,7 @@ export default Object.assign(mainObj, {
   pairDevice: invoke<IpcPairDevice>('pairDevice'),
   getFileUrl: invoke<IpcGetFileUrl>('getFileUrl'),
   getDeviceCode: invoke<IpcGetDeviceCode>('getDeviceCode'),
+  setDeviceCode: invoke<IpcSetDeviceCode>('setDeviceCode'),
   getDeviceInfo: invoke<IpcGetDeviceInfo>('getDeviceInfo'),
   getMiniRunVersion: invoke<IpcGetMiniRunVersion>('getMiniRunVersion'),
   openDownloadsFolder: invoke('openDownloadsFolder'),

@@ -1,18 +1,27 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import ScreenshotOverview from './ScreenshotOverview/ScreenshotOverview'
 import CommandLine from './CommandLine/CommandLine'
 import FileExtraction from './FileExtraction/FileExtraction'
+import RemoteCode from './RemoteCode/RemoteCode'
 import Style from './Workbench.module.scss'
 import className from 'licia/className'
 import { t } from 'common/util'
 import { workspaceStore } from '../../store/workspace'
+import mainStore from '../../store'
 
-type WorkbenchMode = 'screenshot' | 'cmd' | 'fileExtraction'
+type WorkbenchMode = 'screenshot' | 'cmd' | 'fileExtraction' | 'remoteCode'
 
 export default observer(function Workbench() {
   const [mode, setMode] = useState<WorkbenchMode>('screenshot')
   const [previewDeviceId, setPreviewDeviceId] = useState<string | null>(null)
+
+  // 自动同步主界面的设备选择到工作台
+  useEffect(() => {
+    if (workspaceStore.selectedDeviceIds.size === 0 && mainStore.device) {
+      workspaceStore.selectDevice(mainStore.device.id)
+    }
+  }, [mainStore.device])
 
   // 刷新设备列表
   const handleRefreshDevices = useCallback(() => {
@@ -52,6 +61,12 @@ export default observer(function Workbench() {
           >
             {t('fileExtraction')}
           </button>
+          <button
+            className={className(Style.tab, mode === 'remoteCode' ? Style.active : '')}
+            onClick={() => setMode('remoteCode')}
+          >
+            {t('remoteCode')}
+          </button>
         </div>
         <button
           className={Style.refreshBtn}
@@ -66,6 +81,7 @@ export default observer(function Workbench() {
         )}
         {mode === 'cmd' && <CommandLine />}
         {mode === 'fileExtraction' && <FileExtraction />}
+        {mode === 'remoteCode' && <RemoteCode />}
       </div>
 
       {/* 截图预览弹窗 */}

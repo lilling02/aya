@@ -184,3 +184,4 @@ export type IpcGetFileUrl = (
 export type IpcGetDeviceCode = (deviceId: string) => Promise<string>
 export type IpcGetDeviceInfo = (deviceId: string) => Promise<string>
 export type IpcGetMiniRunVersion = (deviceId: string) => Promise<string>
+export type IpcSetDeviceCode = (deviceId: string, code: string) => Promise<void>
