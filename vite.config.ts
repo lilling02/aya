@@ -35,6 +35,7 @@ export default defineConfig(async (): Promise<UserConfig> => {
     },
     server: {
       hmr: false,
+      host: true,
       port: 8080,
     },
     define: {
