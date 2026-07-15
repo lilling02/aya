@@ -41,8 +41,10 @@ export default observer(function File() {
   const { device, file } = store
 
   useEffect(() => {
-    go('/')
-  }, [])
+    if (file.currentPath && file.currentPath !== path) {
+      go(file.currentPath)
+    }
+  }, [file.currentPath])
 
   async function getFiles(path: string) {
     if (device) {
@@ -64,6 +66,7 @@ export default observer(function File() {
         }
       }
       setPath(path)
+      file.setCurrentPath(path)
       setCustomPath(path)
       setFileList(files)
       setFilter('')

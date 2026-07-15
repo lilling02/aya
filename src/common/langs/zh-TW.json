@@ -267,6 +267,7 @@
   "enterPathPlaceholder": "請輸入檔案路徑",
   "startExtraction": "開始提取",
   "openDownloadDir": "打開下載目錄",
+  "goToDbFolder": "前往數據庫文件夾",
   "autoAddDbSuffix": "自動添加 .db 後綴",
   "filePrefix": "檔案前綴",
   "filePrefixPlaceholder": "可選，如：shop1",

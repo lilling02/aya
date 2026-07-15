@@ -125,6 +125,14 @@ export default observer(function FileExtraction() {
     }
   }
 
+  const handleNavigateToDbFolder = () => {
+    if (activeDevice) {
+      mainStore.selectDevice(activeDevice)
+    }
+    mainStore.file.setCurrentPath('/sdcard/ast-os/files/databases/')
+    mainStore.selectPanel('file')
+  }
+
   const isDark = mainStore.settings.theme === 'dark'
   const terminalBg = isDark ? colorBgContainerDark : colorBgContainer
   const sidebarBg = isDark ? colorBgContainerDark : colorBgContainer
@@ -225,6 +233,14 @@ export default observer(function FileExtraction() {
                   onClick={() => main.openDownloadsFolder()}
                 >
                   {t('openDownloadDir')}
+                </button>
+                <button
+                  type="button"
+                  className={Style.openDirBtn}
+                  onClick={handleNavigateToDbFolder}
+                  disabled={!activeDevice}
+                >
+                  {t('goToDbFolder')}
                 </button>
               </div>
 

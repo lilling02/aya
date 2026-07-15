@@ -13,6 +13,7 @@ export class File {
   transferWeight = 30
   transfers: Transfer[] = []
   bookmarks: string[] = []
+  currentPath = '/'
   constructor() {
     makeObservable(this, {
       listView: observable,
@@ -22,10 +23,15 @@ export class File {
       transfers: observable,
       weights: observable,
       bookmarks: observable,
+      currentPath: observable,
+      setCurrentPath: action,
     })
 
     this.init()
     this.bindEvent()
+  }
+  setCurrentPath(path: string) {
+    this.currentPath = path
   }
   async init() {
     const file = await main.getMainStore('file')

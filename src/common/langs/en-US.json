@@ -249,6 +249,7 @@
   "enterPathPlaceholder": "Please enter file path",
   "startExtraction": "Start Extraction",
   "openDownloadDir": "Open Download Dir",
+  "goToDbFolder": "Go to Database Folder",
   "autoAddDbSuffix": "Auto add .db suffix",
   "filePrefix": "File Prefix",
   "filePrefixPlaceholder": "Optional, e.g., shop1",
