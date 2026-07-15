@@ -254,6 +254,12 @@
   "filePrefix": "File Prefix",
   "filePrefixPlaceholder": "Optional, e.g., shop1",
   "deviceList": "Device List",
-  "noDevices": "No devices"
+  "noDevices": "No devices",
+  "pinDevice": "Pin as favorite device",
+  "unpinDevice": "Unpin favorite device",
+  "connectingDevice": "Connecting to device {{name}}...",
+  "connectDeviceSuccess": "Successfully connected to device {{name}}",
+  "connectDeviceFailed": "Failed to connect to device {{name}}"
 }
+
 

@@ -42,11 +42,82 @@
       opacity: 0.8;
     }
 
-    .close {
+    /* 激活态下，取消/固定和断开连接按钮的悬浮高亮样式 */
+    .close, .pin {
       &:hover {
         background: rgba(255, 255, 255, 0.2);
       }
     }
+
+    /* 激活态下，已固定的图钉按钮颜色设为高对比度的白字 */
+    .pin.pinned {
+      color: var(--color-text-on-primary);
+      opacity: 1;
+    }
+  }
+
+  /* 离线常用设备卡片样式设计：
+     采用半透明和虚线边框来表征离线（灰色占位）状态，降低视觉比重。
+     悬浮时提升透明度，并将边框和图钉变色，指引用户可以点击重连。 */
+  &.offline {
+    opacity: 0.55;
+    background: transparent;
+    border: 1px dashed var(--color-border);
+    cursor: pointer;
+
+    .dot {
+      background: var(--color-text-quaternary, #bfbfbf);
+    }
+
+    .name {
+      color: var(--color-text-secondary);
+    }
+
+    &:hover {
+      opacity: 0.9;
+      background: var(--color-bg-hover);
+      border-color: var(--color-primary);
+    }
+
+    .pin {
+      opacity: 0.5;
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+/* 常用设备的固定/取消固定（Pin）图标按钮样式。
+   默认状态下透明度为0（隐藏），只有在鼠标划入设备卡片（.device:hover）时才淡入显示，保持视觉简洁。 */
+.pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  margin-left: 4px;
+  opacity: 0;
+  transition: all 0.15s;
+  font-size: 10px;
+
+  &:hover {
+    background: var(--color-bg-hover);
+    opacity: 1 !important;
+  }
+
+  /* 已固定状态下的图钉着色为主题色，并常态化保持可见 */
+  &.pinned {
+    opacity: 0.8;
+    color: var(--color-primary);
+  }
+}
+
+/* 当鼠标悬停在设备卡片上时，显示图钉固定按钮以供操作 */
+.device:hover {
+  .pin {
+    opacity: 0.5;
   }
 }
 
@@ -86,3 +157,4 @@
   color: var(--color-text-secondary);
   font-size: 11px;
 }
+

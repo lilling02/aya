@@ -256,5 +256,11 @@
   "filePrefix": "文件前缀",
   "filePrefixPlaceholder": "可选，如：shop1",
   "deviceList": "设备列表",
-  "noDevices": "无设备"
+  "noDevices": "无设备",
+  "pinDevice": "固定为常用设备",
+  "unpinDevice": "取消固定常用设备",
+  "connectingDevice": "正在连接设备 {{name}}...",
+  "connectDeviceSuccess": "连接设备 {{name}} 成功",
+  "connectDeviceFailed": "连接设备 {{name}} 失败"
 }
+
