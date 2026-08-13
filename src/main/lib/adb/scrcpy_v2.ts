@@ -92,6 +92,25 @@ const startScrcpyV2: IpcStartScrcpyV2 = async function (deviceId) {
       args.push('--video-codec', videoCodec)
     }
 
+    // 检查并设置投屏窗口的初始宽度与高度参数，确保在 2K 或更高分辨率设备投屏时窗口尺寸处于合理范围内
+    const windowWidth = Number(deviceSettings.windowWidth) || 0
+    const windowHeight = Number(deviceSettings.windowHeight) || 0
+
+    if (windowWidth > 0) {
+      args.push('--window-width', String(windowWidth))
+    }
+
+    if (windowHeight > 0) {
+      args.push('--window-height', String(windowHeight))
+    }
+
+    // scrcpy 默认开启窗口宽高比锁定（--window-aspect-ratio-lock=true），
+    // 会用视频的宽高比约束窗口尺寸，导致上面显式设置的窗口宽高被覆盖。
+    // 这里在指定了窗口尺寸时关闭锁定，让宽高精确生效（画面按比例缩放适配）。
+    if (windowWidth > 0 || windowHeight > 0) {
+      args.push('--no-window-aspect-ratio-lock')
+    }
+
     logger.info(`Args: ${args.join(' ')}`)
 
     // Inherit environment variables and set ADB path if needed

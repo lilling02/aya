@@ -129,6 +129,8 @@
   "startScreencast": "Start Screencast",
   "screencastParam": "Screencast Parameters",
   "scrcpyPath": "scrcpy Path",
+  "windowWidth": "Window Width",
+  "windowHeight": "Window Height",
   "notSelected": "Not Selected",
   "power": "Power",
   "volumeUp": "Volume Up",
